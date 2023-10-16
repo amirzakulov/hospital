@@ -1,0 +1,113 @@
+body{
+    -webkit-print-color-adjust:exact;
+}
+/*************************************************/
+.page-header, .page-header-space {
+    height: 300px;
+    display: none;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.page-header {
+    position: fixed;
+    top: 0mm;
+    width: 100%;
+}
+
+.page-footer, .page-footer-space {
+	height: 60px;
+	display: none !important;
+	border: none !important;
+	box-shadow: none !important;
+}
+
+.page-footer:after {
+	counter-increment: page;
+	content: counter(page)
+}
+
+.print_page_break {
+    page-break-inside: avoid;
+
+}
+@media print {
+	.page-footer {
+		position: fixed;
+		bottom: 0;
+		width: 100%;
+	}
+	thead {display: table-header-group;}
+	tfoot {display: table-footer-group;}
+	.page-header-space {display: block;}
+	.page-footer-space {display: block !important;}
+	.page-footer {display: block !important;}
+
+    body {margin: 0;}
+
+    .zmlogo .lab_blank_header {
+        height: 300px;
+        width: 100%;
+    }
+
+    .zmlogo .lab_blank_header .lab_blank_header_top {
+        display: flex;
+        flex-wrap: nowrap;
+    }
+
+    .table-bordered th {
+        background-color: rgba(232, 229, 229, 0.92) !important;
+    }
+
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid #000 !important;
+        font-size: 1.2rem;
+    }
+    .table td.print_border {
+        border: 1px solid #000 !important;
+    }
+
+    .lab_blank_header .lab_blank_logo {
+        /*width: 230px;*/
+        width: 550px;
+    }
+    .lab_blank_header .lab_blank_header_text {
+        flex-grow: 3;
+        text-align: right;
+    }
+    .lab_blank_header .lab_blank_header_text p {
+        font-size: 16px;
+    }
+    .result_cell {
+        font-width: 600;
+    }
+
+	.hide_from_print {
+		display: none !important;
+	}
+
+	.uzi_print {
+		padding-top: 253px;
+	}
+
+	.print_doctor {
+		font-size: 1.2rem;
+		color: #000000;
+	}
+
+	/*.lab_title {*/
+	/*	text-align: left;*/
+	/*	font-size: 1.4rem !important;*/
+	/*}*/
+}
+
+
+
+@page {
+    margin: 10mm 20mm;
+
+
+    }
+
+
