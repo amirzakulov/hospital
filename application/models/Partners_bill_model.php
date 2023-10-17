@@ -31,4 +31,17 @@ class Partners_bill_model extends CI_Model
 
 	}
 
+	public function get_partner_bill_by_date($partner_id, $start_date = null, $end_date = null)
+	{
+		$this->db->select("pb.partner_id, SUM(pb.amount) as amount");
+		$this->db->where("partner_id", $partner_id);
+		$this->db->where("date(pb.created_date) >=", $start_date);
+		$this->db->where("date(pb.created_date) <=", $end_date);
+		$this->db->group_by("pb.partner_id");
+		$query = $this->db->get("partners_bill pb");
+
+		return $query->row_array();
+
+	}
+
 }

@@ -34,6 +34,18 @@ class Doctors_bill_model extends CI_Model
 		return $expenses_list ? $query->result_array() : $query->row_array()["amount"];
 	}
 
+	public function get_doctor_bill_by_date($doctor_id, $start_date = null, $end_date = null)
+	{
+		$this->db->select("db.doctor_id, SUM(db.amount) as amount");
+		$this->db->where("db.doctor_id", $doctor_id);
+		$this->db->where("date(db.created_date) >=", $start_date);
+		$this->db->where("date(db.created_date) <=", $end_date);
+		$this->db->group_by("db.doctor_id");
+		$query = $this->db->get("doctors_bill db");
+
+		return $query->row_array();
+
+	}
 
 
 }

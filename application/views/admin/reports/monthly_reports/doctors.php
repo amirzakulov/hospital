@@ -9,6 +9,9 @@
 				<th class="align-text-top text-right">Жами<br></th>
 				<th class="align-text-top text-right">Улуш %</th>
 				<th class="align-text-top text-right">Улуш сўм</th>
+				<th class="align-text-top text-right">Тўланди</th>
+				<th class="align-text-top text-right">Қолди</th>
+				<th class="align-text-top text-right"></th>
 			</tr>
 			</thead>
 			<tbody>
@@ -19,17 +22,24 @@
 				<?php foreach ($service_modules as $service_module_name => $service_module) {?>
 					<?php if($service_module["total"]) {?>
 						<?php if($counter === 0) {?>
-							<tr><td colspan="5"><strong><?= $doctors_array[$doctor_id]; ?></strong></td></tr>
+							<tr><td colspan="7"><strong><?= $doctors_array[$doctor_id]; ?></strong></td></tr>
 						<?php } ?>
 						<?php
 						$total +=$service_module["total"];
 						$partner_total +=$service_module["partner_total"];
+						?>
+
+						<?php
+						$CI =& get_instance();
+						$bill = $CI->doctors_bill_model->get_doctor_bill_by_date($doctor_id, '2023-10-01', '2023-10-30');
+						$amount = is_null($bill) ? 0 : $bill['amount'];
 						?>
 						<tr class="text-right">
 							<td class="text-left"><?= $service_module_name; ?></td>
 							<td><?= $service_module["total"]; ?></td>
 							<td><?= $service_module["partner_share"]; ?></td>
 							<td><?= $service_module["partner_total"]; ?></td>
+							<td colspan="3">&nbsp;</td>
 						</tr>
 						<?php $counter++; ?>
 					<?php } ?>
@@ -42,8 +52,24 @@
 						<td><strong><?= $total; ?></strong></td>
 						<td></td>
 						<td><strong><?= $partner_total; ?></strong></td>
+						<td class="js_doctor_bill_paid"><strong><?= $amount; ?></strong></td>
+						<td class="js_doctor_bill_left"><strong><?= $partner_total - $amount; ?></strong></td>
+						<td width="200" class="text-right">
+							<div class="input-group float-right" style="width: 150px;">
+								<input class="form-control form-control-sm" name="doctor_payment" type="text">
+								<div class="input-group-append">
+									<button class="btn btn-primary btn-sm js_pay_doctor_bill" type="button"
+											data-url="<?= site_url('admin/doctors/ajax_doctor_checkout') ?>"
+											data-doctor-id="<?= $doctor_id ?>"
+											data-paid="<?= $amount ?>"
+											data-debt="<?= $partner_total - $amount ?>"
+									><span class="fa fa-check"></span></button>
+								</div>
+							</div>
+							<small class="text-danger js_pay_doctor_bill_error"></small>
+						</td>
 					</tr>
-					<tr><td colspan="5">&nbsp;</td></tr>
+					<tr><td colspan="7">&nbsp;</td></tr>
 				<?php } ?>
 			<?php } ?>
 

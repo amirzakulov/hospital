@@ -18,6 +18,7 @@ class Doctors extends Admin_Controller {
                 "departments_model",
                 "service_modules_model",
                 "service_modules_shares_model",
+                "doctors_bill_model",
             )
         );
     }
@@ -754,5 +755,19 @@ class Doctors extends Admin_Controller {
             }
         }
     }
+
+	public function ajax_doctor_checkout()
+	{
+		if($this->input->is_ajax_request() ) {
+
+			$doctor_id = $this->input->post("doctor_id");
+			$amount = $this->input->post("amount");
+
+			$this->doctors_bill_model->add(array("doctor_id" => $doctor_id, "amount" => $amount));
+
+			echo json_encode($this->input->post());
+		}
+
+	}
 
 }

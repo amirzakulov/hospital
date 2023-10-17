@@ -29,6 +29,7 @@ class Reports extends Admin_Controller {
 				"payments_debt_discount_model",
 				"partners_model",
 				"service_modules_model",
+				"partners_bill_model",
             ));
 
         $this->load->language("patients");
@@ -80,6 +81,7 @@ class Reports extends Admin_Controller {
         $this->data["expenditure_payment_types"] = $this->expenses_model->get_expenses_payment_type($start_date, $end_date);
 		$this->data["last_payments"]= $this->patients_payments_model->get_payments(date("Y-m-d"), null, 5);
 
+		/** ***************************************/
 		$this->load->library('reports/generalDailyReport', ["start_date"=>$start_date, "end_date"=>$end_date]);
 		$generalDailyReport = $this->generaldailyreport->show();
 
@@ -110,6 +112,8 @@ class Reports extends Admin_Controller {
 		$partnersDailyReport = new PartnersDailyReport();
 
 		//Xamkorlar daily report
+
+		/***/
 		$partnersDailyReportParams = [
 			"start_date" 	  => $start_date,
 			"end_date"   	  => $end_date,
@@ -121,6 +125,7 @@ class Reports extends Admin_Controller {
 			$partner_modules = $partnersDailyReport->show($partnersDailyReportParams);
 		}
 		$this->data["partners_report"] = $partner_modules;
+
 
 		//Xamkorlar monthly report
 		$partnersMonthlyReportParams = [
@@ -136,7 +141,9 @@ class Reports extends Admin_Controller {
 		$this->data["partners_monthly_report"] = $partners_monthly_modules;
 
 
+
 		//Doctors Report
+
 		$doctors = $this->doctors_model->get_doctors_all();
 
 		$doctors_array= [];
@@ -166,7 +173,7 @@ class Reports extends Admin_Controller {
 			"doctors" 		  => $doctors,
 		];
 		$this->data["sender_doctors_monthly_report"] = $doctorsReportObj->show($doctorsMonthlyReportParams);
-
+		/***/
 
 		$this->data["start_date_param"] = $start_date_param;
         $this->data["end_date_param"]   = $end_date_param;
@@ -669,8 +676,6 @@ class Reports extends Admin_Controller {
 		$this->render('admin/reports/cash_view');
 
 	}
-
-
 
 	public function uzi2($start_date = null, $end_date = null)
 	{

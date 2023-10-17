@@ -928,6 +928,72 @@ $(document).ready(function () {
 		}, "json")
 
 	})
+
+	$(".js_pay_partner_bill").click(function(){
+		const $this = $(this)
+		const url = $this.data("url")
+		const partner_id = $this.data("partnerId")
+		const paid = $this.data("paid")
+		const debt = $this.data("debt")
+		const payment_input = $this.closest("td").find("input[name='payment']");
+		const amount = parseInt(payment_input.val())
+		const error_dom = $this.closest("td").find(".js_pay_partner_bill_error");
+		const tr = $this.closest("tr")
+		const partner_bill_paid = tr.find(".js_partner_bill_paid strong")
+		const partner_bill_left = tr.find(".js_partner_bill_left strong")
+		error_dom.html('')
+
+		const data = {
+			partner_id: partner_id,
+			amount: amount,
+		}
+
+		if(debt >= amount && amount > 0) {
+
+			$.post(url, data, function (res) {
+				console.log(res)
+				partner_bill_paid.html(paid + amount)
+				partner_bill_left.html(debt - amount)
+				payment_input.val('')
+			}, "json")
+		} else {
+			error_dom.html('Қийматни текшириб қайта киритинг!')
+		}
+	});
+
+	$(".js_pay_doctor_bill").click(function(){
+		const $this = $(this)
+		const url = $this.data("url")
+		const doctor_id = $this.data("doctorId")
+		const paid = $this.data("paid")
+		const debt = $this.data("debt")
+		const payment_input = $this.closest("td").find("input[name='doctor_payment']");
+		const amount = parseInt(payment_input.val())
+		const error_dom = $this.closest("td").find(".js_pay_doctor_bill_error");
+		const tr = $this.closest("tr")
+		const doctor_bill_paid = tr.find(".js_doctor_bill_paid strong")
+		const doctor_bill_left = tr.find(".js_doctor_bill_left strong")
+		error_dom.html('')
+
+		const data = {
+			doctor_id: doctor_id,
+			amount: amount,
+		}
+
+		if(debt >= amount && amount > 0) {
+
+			$.post(url, data, function (res) {
+				console.log(res)
+				doctor_bill_paid.html(paid + amount)
+				doctor_bill_left.html(debt - amount)
+				payment_input.val('')
+			}, "json")
+		} else {
+			error_dom.html('Қийматни текшириб қайта киритинг!')
+		}
+
+
+	});
 });
 
 

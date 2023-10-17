@@ -596,8 +596,6 @@ class Partners extends Admin_Controller {
 
 	public function ajax_partner_checkout()
 	{
-//		$aa = $this->partners_bill_model->get_partners_bill();
-
 		if($this->input->is_ajax_request() ) {
 
 			$partner_id = $this->input->post("partner_id");
