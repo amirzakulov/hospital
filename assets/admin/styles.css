@@ -170,7 +170,7 @@ b, strong {
     position: fixed;
     top: 50%;
     left: 50%;
-    z-index: 999;
+    z-index: 9999;
 }
 .page-wrapper > .content {
     padding: 0;
@@ -248,10 +248,10 @@ a.backurl {
     margin-bottom: 0px;
     display: block;
 }
-#expenses .modal-body {
+.checkout_modal_wrapper .modal-body {
     min-height: 15rem;
 }
-#expenses .modal-footer {
+.checkout_modal_wrapper .modal-footer {
     display: block;
 }
 .search-items {
@@ -283,11 +283,11 @@ a.backurl {
 .expenses_table .expenser {
     font-size: 11px;
 }
-#expenses .reg_cash_format {
+.checkout_modal_wrapper .reg_cash_format {
     font-size: 1.5rem;
     font-weight: 700;
 }
-#expenses .reg_cash_format--red {
+.checkout_modal_wrapper .reg_cash_format--red {
     color: #ff0000;
 }
 .btn:focus {

@@ -73,6 +73,8 @@ class Reports extends Admin_Controller {
             $end_date_param   = date("Ymd", strtotime($end_date));
 		}
 
+		$this->data["payment_types"] = $this->payment_types_model->get_payment_types();
+
 		$this->data["cash"] 		= $this->show_cash($start_date, $end_date);
 
 		$this->data["income"] 		= $this->patients_payments_model->income_by_items($start_date, $end_date);
@@ -81,7 +83,9 @@ class Reports extends Admin_Controller {
         $this->data["expenditure_payment_types"] = $this->expenses_model->get_expenses_payment_type($start_date, $end_date);
 		$this->data["last_payments"]= $this->patients_payments_model->get_payments(date("Y-m-d"), null, 5);
 
-		/** ***************************************/
+
+
+		/** ************************************* **/
 		$this->load->library('reports/generalDailyReport', ["start_date"=>$start_date, "end_date"=>$end_date]);
 		$generalDailyReport = $this->generaldailyreport->show();
 
@@ -92,50 +96,56 @@ class Reports extends Admin_Controller {
 		$this->data["doctors_total"]	= $generalDailyReport["doctors_total"];
 
 
-
 		$service_modules = $this->service_modules_model->get_service_modules_array();
+		/** */
 		$now = new DateTime("now");
 		$m_start_date = $now->format("Y-m-1");
 		$m_end_date = $now->format("Y-m-t");
+		$this->data['m_start_date'] = $m_start_date;
+		$this->data['m_end_date'] 	= $m_end_date;
 
 
-
-		$partners_array= [];
-		$partners = $this->patients_payments_model->get_partners();
-		foreach ($partners as $partner) {
-			$partners_array[$partner["id"]] = $partner["last_name"]." ".$partner["first_name"];
+		/** */
+		$partners_daily_array= [];
+		$partners_daily = $this->patients_payments_model->get_partners();
+		foreach ($partners_daily as $partner) {
+			$partners_daily_array[$partner["id"]] = $partner["last_name"]." ".$partner["first_name"];
 		}
-		$this->data["partners_array"] = $partners_array;
+		$this->data["partners_daily_array"] = $partners_daily_array;
 
 		//Xamkorlar report
 		$this->load->library('reports/PartnersDailyReport');
 		$partnersDailyReport = new PartnersDailyReport();
-
+/**/
 		//Xamkorlar daily report
-
-		/***/
 		$partnersDailyReportParams = [
 			"start_date" 	  => $start_date,
 			"end_date"   	  => $end_date,
 			"service_modules" => $service_modules,
-			"partners" 		  => $partners,
+			"partners" 		  => $partners_daily,
 			];
 		$partner_modules = array();
-		if(count($partners)) {
+		if(count($partners_daily)) {
 			$partner_modules = $partnersDailyReport->show($partnersDailyReportParams);
 		}
 		$this->data["partners_report"] = $partner_modules;
 
-
 		//Xamkorlar monthly report
+		$partners_monthly_array = [];
+		$partners_monthly = $this->patients_payments_model->get_partners($m_start_date, $m_end_date);
+		foreach ($partners_monthly as $partner) {
+			$partners_monthly_array[$partner["id"]] = $partner["last_name"]." ".$partner["first_name"];
+		}
+		$this->data["partners_monthly_array"] = $partners_monthly_array;
+
 		$partnersMonthlyReportParams = [
 			"start_date" 	  => $m_start_date,
 			"end_date"   	  => $m_end_date,
 			"service_modules" => $service_modules,
-			"partners" 		  => $partners,
+			"partners" 		  => $partners_monthly,
 		];
 		$partners_monthly_modules = array();
-		if(count($partners)) {
+		if(count($partners_monthly)) {
 			$partners_monthly_modules = $partnersDailyReport->show($partnersMonthlyReportParams);
 		}
 		$this->data["partners_monthly_report"] = $partners_monthly_modules;
@@ -143,7 +153,6 @@ class Reports extends Admin_Controller {
 
 
 		//Doctors Report
-
 		$doctors = $this->doctors_model->get_doctors_all();
 
 		$doctors_array= [];
@@ -164,7 +173,6 @@ class Reports extends Admin_Controller {
 		];
 		$this->data["sender_doctors_report"] = $doctorsReportObj->show($doctorsDailyReportParams);
 
-
 		//Doctors Monthly Report
 		$doctorsMonthlyReportParams = [
 			"start_date" 	  => $m_start_date,
@@ -173,7 +181,14 @@ class Reports extends Admin_Controller {
 			"doctors" 		  => $doctors,
 		];
 		$this->data["sender_doctors_monthly_report"] = $doctorsReportObj->show($doctorsMonthlyReportParams);
-		/***/
+
+		$this->data['vitamed'] 			= $this->reports_model->vitamed_total($start_date, $end_date);
+		$this->data['vitamed_monthly'] 	= $this->reports_model->vitamed_total($m_start_date, $m_end_date);
+
+		$this->data["expenditure_monthly"] 	= $this->expenses_model->get_expenses_by_type($m_start_date, $m_end_date);
+/**/
+
+		/** *********************************************** **/
 
 		$this->data["start_date_param"] = $start_date_param;
         $this->data["end_date_param"]   = $end_date_param;

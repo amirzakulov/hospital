@@ -155,13 +155,13 @@
             <div class="form-group mb-5">
                 <label class="display-block">Холат</label>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="status" id="doctor_active" value="1" checked>
+                    <input class="form-check-input" type="radio" name="active" id="doctor_active" value="1" checked>
                     <label class="form-check-label" for="doctor_active">
                         Active
                     </label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="status" id="doctor_inactive" value="0">
+                    <input class="form-check-input" type="radio" name="active" id="doctor_inactive" value="0">
                     <label class="form-check-label" for="doctor_inactive">
                         Inactive
                     </label>

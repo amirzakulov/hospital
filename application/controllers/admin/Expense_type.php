@@ -91,6 +91,8 @@ class Expense_type extends Admin_Controller {
 
 		$was_validated = "";
 		$expense_type = $this->expense_type_model->get_expense_type($id);
+		$this->data["expense_type"] = $expense_type;
+
 
 		$this->form_validation->set_rules('name', "Чиқим тури", 'trim|required');
 		if ($this->form_validation->run() === TRUE) {

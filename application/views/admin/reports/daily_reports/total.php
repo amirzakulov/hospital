@@ -103,7 +103,7 @@
 
 			<?php } ?>
 
-			<tr class="bg-light1 text-primary">
+			<tr class="text-primary">
 				<td>Жами</td>
 				<td class="text-right"><?= money_formatting($doctor_total); ?></td>
 				<td class="text-right"><?= money_formatting($doctor_share); ?></td>
@@ -141,14 +141,14 @@
 				<td class="text-danger text-right"></td>
 			</tr>
 
-			<tr>
-				<td colspan="5">&nbsp;</td>
-			</tr>
+<!--			<tr>-->
+<!--				<td colspan="5">&nbsp;99999999</td>-->
+<!--			</tr>-->
 
-			<tr class="bg-light1 text-primary">
+			<tr class="text-primary">
 				<td>Касса: </td>
 				<td class="text-right">
-					<?php $cash_total = ($laboratory_total['total'] + $uzi_total['total'] + $services_total['total'] + $rooms_total['total'] + $doctor_total) - ($cash["expenditure"] + $cash["debt"]["debt"] + $cash["total_payment"]["discount"]); ?>
+					<?php $cash_total = ($laboratory_total['total'] + $uzi_total['total'] + $services_total['total'] + $rooms_total['total'] + $doctor_total + $paid_debts) - ($cash["expenditure"] + $cash["debt"]["debt"] + $cash["total_payment"]["discount"]); ?>
 					<?= money_formatting($cash_total); ?>
 				</td>
 				<td colspan="2"></td>

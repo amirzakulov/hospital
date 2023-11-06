@@ -18,7 +18,7 @@
 				<?php foreach ($service_modules as $service_module_name => $service_module) {?>
 				<?php if($service_module["total"]) {?>
 						<?php if($counter === 0) {?>
-							<tr><td colspan="5"><strong><?= $partners_array[$partner_id]; ?></strong></td></tr>
+							<tr><td colspan="5"><strong><?= $partners_daily_array[$partner_id]; ?></strong></td></tr>
 						<?php } ?>
 					<?php
 					$total +=$service_module["total"];

@@ -110,63 +110,74 @@
                                         </div>
                                     </div>
                                 </div>
+
+								<div class="row">
+									<div class="col-sm-4 col-md-4 col-lg-4">
+										<div class="form-group">
+											<?php echo lang('create_user_department_name_label', 'department_id');?>
+											<?= form_dropdown($departments, $department_options, $doctor["department_id"]); ?>
+											<div class="invalid-feedback"><?= form_error('department_id'); ?></div>
+										</div>
+									</div>
+									<div class="col-sm-4 col-md-4 col-lg-4">
+										<div class="form-group">
+											<?php echo lang('create_user_doctor_group_label', 'groups', array(), true);?>
+											<?= form_dropdown($groups, $group_options, $doctor["group_id"]); ?>
+											<div class="invalid-feedback"><?= form_error('group_id'); ?></div>
+										</div>
+									</div>
+									<div class="col-sm-4 col-md-4 col-lg-4">
+										<div class="form-group">
+											<?php echo lang('create_user_doctors_types_label', 'doctors_types');?>
+											<?= form_dropdown($doctors_types, $doctors_types_options, $doctor["doctor_type_id"]); ?>
+											<div class="invalid-feedback"><?= form_error('doctor_type_id'); ?></div>
+										</div>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-sm-4">
+										<div class="form-group mb-2">
+											<label class="display-block">Холати</label>
+											<div class="form-check form-check-inline">
+												<input class="form-check-input" type="radio" name="active" id="doctor_active" value="1" <?= $doctor["active"] == 1 ? "checked" : ""; ?>>
+												<label class="form-check-label" for="doctor_active">
+													Фаол
+												</label>
+											</div>
+											<div class="form-check form-check-inline">
+												<input class="form-check-input" type="radio" name="active" id="doctor_inactive" value="0" <?= $doctor["active"] == 0 ? "checked" : ""; ?>>
+												<label class="form-check-label" for="doctor_inactive">
+													Нофаол
+												</label>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-sm-4">
+										<div class="form-group">
+											<label>Расм</label>
+											<div class="profile-upload">
+												<div class="upload-img">
+													<img alt="" src="<?= empty($doctor["photo"]) ? site_url("assets/admin/img/user.jpg") : site_url(EMPLOYEE_PHOTO_PATH).$doctor["photo"]; ?>">
+												</div>
+												<div class="upload-input">
+													<input type="file" class="form-control" name="userfile">
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
                             </div>
 
-                            <div class="col-sm-4 col-md-4 col-lg-4">
-                                <div class="form-group">
-                                    <?php echo lang('create_user_department_name_label', 'department_id');?>
-                                    <?= form_dropdown($departments, $department_options, $doctor["department_id"]); ?>
-                                    <div class="invalid-feedback"><?= form_error('department_id'); ?></div>
-                                </div>
-                            </div>
-                            <div class="col-sm-4">
-                                <div class="form-group">
-                                    <?php echo lang('create_user_doctor_group_label', 'groups', array(), true);?>
-                                    <?= form_dropdown($groups, $group_options, $doctor["group_id"]); ?>
-                                    <div class="invalid-feedback"><?= form_error('group_id'); ?></div>
-                                </div>
-                            </div>
-                            <div class="col-sm-4 col-md-4 col-lg-4">
-                                <div class="form-group">
-                                    <?php echo lang('create_user_doctors_types_label', 'doctors_types');?>
-                                    <?= form_dropdown($doctors_types, $doctors_types_options, $doctor["doctor_type_id"]); ?>
-                                    <div class="invalid-feedback"><?= form_error('doctor_type_id'); ?></div>
-                                </div>
-                            </div>
-
-
-                            <div class="col-sm-4">
-                                <div class="form-group">
-                                    <label>Расм</label>
-                                    <div class="profile-upload">
-                                        <div class="upload-img">
-                                            <img alt="" src="<?= empty($doctor["photo"]) ? site_url("assets/admin/img/user.jpg") : site_url(EMPLOYEE_PHOTO_PATH).$doctor["photo"]; ?>">
-                                        </div>
-                                        <div class="upload-input">
-                                            <input type="file" class="form-control" name="userfile">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="form-group mb-5">
-                <label class="display-block">Холати</label>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="status" id="doctor_active" value="1" <?= $doctor["active"] == 1 ? "checked" : ""; ?>>
-                    <label class="form-check-label" for="doctor_active">
-                        Фаол
-                    </label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="status" id="doctor_inactive" value="0" <?= $doctor["active"] == 0 ? "checked" : ""; ?>>
-                    <label class="form-check-label" for="doctor_inactive">
-                        Нофаол
-                    </label>
-                </div>
-            </div>
+
 
 
 

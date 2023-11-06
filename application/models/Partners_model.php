@@ -7,8 +7,11 @@ class Partners_model extends CI_Model
         parent::__construct();
     }
 
-    public function get_partners()
+    public function get_partners($type = null, $active = null)
     {
+    	if(!is_null($type)) $this->db->where("type", $type);
+    	if(!is_null($active)) $this->db->where("active", $active);
+
         $this->db->order_by("last_name", "asc");
         $result = $this->db->get("partners")->result_array();
 
@@ -18,7 +21,7 @@ class Partners_model extends CI_Model
     public function get_partners_laboratory()
     {
         $this->db->order_by("company", "asc");
-        $result = $this->db->get_where("partners", array("department"=>2))->result_array();
+        $result = $this->db->get_where("partners", array("department"=>2, "type" => 2))->result_array();
 
         $partners = array("" => "--Танлаш--");
         foreach ($result as $partner) {
@@ -30,17 +33,13 @@ class Partners_model extends CI_Model
 
     public function get_partner($id)
     {
-        $result = $this->db->get_where("partners", array("id" => $id))->row_array();
-
-        return $result;
+		return $this->db->get_where("partners", array("id" => $id))->row_array();
     }
 
     public function update($id, $arr)
     {
         $this->db->where("id", $id);
-        $result = $this->db->update("partners", $arr);
-
-        return $result;
+		return $this->db->update("partners", $arr);
     }
 
     public function add($arr)
@@ -67,7 +66,7 @@ class Partners_model extends CI_Model
 						FROM partners_bill pb
 						GROUP BY pb.partner_id
 					) as pb ON pb.partner_id = pp.partner_id
-					WHERE pp.partner_id > 0
+					WHERE pp.partner_id > 0 AND p.type = 1
 					GROUP BY pp.partner_id
 		");
 
@@ -86,6 +85,7 @@ class Partners_model extends CI_Model
 						WHERE MONTH(pb.created_date) = '".$month."'
 						GROUP BY pb.partner_id
 					)pb ON pb.partner_id = p.id
+					WHERE p.type = 1
 		");
 
 		$partners = array();
@@ -133,5 +133,7 @@ class Partners_model extends CI_Model
 
 		return $query->result_array();
 	}
+
+
 
 }

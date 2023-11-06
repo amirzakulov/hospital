@@ -78,7 +78,7 @@
 									<div class="widget-content-wrapper">
 										<div class="widget-content-left">
 											<div class="widget-heading">Қарз</div>
-											<div class="widget-subheading font-18 text-danger"><a href="<?= site_url("admin/reports/debts/".$start_date_param."/".$end_date_param); ?>"><?= money_formatting($cash["debt"]["debt"]); ?></a></div>
+											<div class="widget-subheading font-18 text-danger"><a class="js_report_tab_debt_link cursor-pointer"><?= money_formatting($cash["debt"]["debt"]); ?></a></div>
 										</div>
 									</div>
 								</div>
@@ -252,7 +252,7 @@
 					<a class="js_report_tab nav-link show cursor-pointer <?= $this->uri->segment(3) == "from_old_debts" ? "active":"" ?>" data-href="<?= site_url("admin/reports/ajax_from_old_debts") ?>">Эски қарзлардан</a>
                 </li>
 				<li class="nav-item">
-					<a class="js_report_tab nav-link show cursor-pointer <?= $this->uri->segment(3) == "debts" ? "active":"" ?>" data-href="<?= site_url("admin/reports/ajax_debts") ?>">Қарздорлар</a>
+					<a class="js_report_tab nav-link show cursor-pointer debt <?= $this->uri->segment(3) == "debts" ? "active":"" ?>" data-href="<?= site_url("admin/reports/ajax_debts") ?>">Қарздорлар</a>
                 </li>
             </ul>
 

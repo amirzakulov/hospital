@@ -50,16 +50,18 @@ class Services {
         //Xamkorlar
         $partners_options[] = "-- Танлаш --";
         foreach ($this->ci->partners_model->get_partners() as $partner) {
-            if($partner["type"] == 1) {
+			if($partner["type"] == 1 && $partner["active"] == 1) {
                 $partners_options[$partner["id"]] = $partner["last_name"] ." ". $partner["first_name"];
-            } else {
-                $partners_options[$partner["id"]] = $partner["company"];
             }
+
+//            else {
+//                $partners_options[$partner["id"]] = $partner["company"];
+//            }
         }
 
         //Sender Doctors
 		$sender_doctors_options[] = "-- Танлаш --";
-		foreach ($this->ci->doctors_model->get_doctors_all() as $sender_doctor) {
+		foreach ($this->ci->doctors_model->get_doctors_all(1) as $sender_doctor) {
 			$sender_doctors_options[$sender_doctor["id"]] = $sender_doctor["last_name"]." ".$sender_doctor["first_name"];
 		}
 
@@ -420,7 +422,8 @@ class Services {
     {
         $docs = array();
         $docs_price = array();
-        foreach ($this->ci->doctors_model->get_doctors() as $doctor) {
+//        foreach ($this->ci->doctors_model->get_doctors() as $doctor) {
+        foreach ($this->ci->doctors_model->get_doctors_all(1) as $doctor) {
             if($doctor["price"] > 0) {
                 $docs[$doctor["id"]]        = $doctor["last_name"] ." ". $doctor["first_name"] . " (".$doctor["department_name"].")";
                 $docs_price[$doctor["id"]]  = $doctor["price"];

@@ -36,28 +36,26 @@ class PartnersDailyReport
 
 		if(count($this->partners)) {
 			foreach ($this->partners as $partner) {
-				if($partner["id"]){
-					foreach ($this->service_modules as $service_module_id => $service_module_name) {
-						if($service_module_id == 1) {//doctor
-							$partner_modules[$partner["id"]][$service_module_name]= $this->ci->reports_model->partner_doctors_total($partner["id"], $service_module_id, $this->start_date, $this->end_date);
-						}
-						if($service_module_id == 2) {//laboratoria
-							$partner_modules[$partner["id"]][$service_module_name]= $this->ci->reports_model->partner_laboratory_total($partner["id"], $service_module_id, $this->start_date, $this->end_date);
-						}
-						if($service_module_id == 3) {//uzi
-							$partner_modules[$partner["id"]][$service_module_name]= $this->ci->reports_model->partner_uzi_total($partner["id"], $service_module_id, $this->start_date, $this->end_date);
-						}
-						if($service_module_id == 4) { //Muolaja xizmati
-							$partner_modules[$partner["id"]][$service_module_name]= $this->ci->reports_model->partner_services_total($partner["id"], $service_module_id, $this->start_date, $this->end_date);
-						}
-						if($service_module_id == 5) { //EKG
-							$partner_modules[$partner["id"]][$service_module_name]= $this->ci->reports_model->partner_ekg_total($partner["id"], $service_module_id, $this->start_date, $this->end_date);
-						}
-						if($service_module_id == 6) { //Xolter
-							$partner_modules[$partner["id"]][$service_module_name]= $this->ci->reports_model->partner_holter_total($partner["id"], $service_module_id, $this->start_date, $this->end_date);
-						}
-
+				foreach ($this->service_modules as $service_module_id => $service_module_name) {
+					if($service_module_id == 1) {//doctor
+						$partner_modules[$partner["id"]][$service_module_name]= $this->ci->reports_model->partner_doctors_total($partner["id"], $service_module_id, $this->start_date, $this->end_date);
 					}
+					if($service_module_id == 2) {//laboratoria
+						$partner_modules[$partner["id"]][$service_module_name]= $this->ci->reports_model->partner_laboratory_total($partner["id"], $service_module_id, $this->start_date, $this->end_date);
+					}
+					if($service_module_id == 3) {//uzi
+						$partner_modules[$partner["id"]][$service_module_name]= $this->ci->reports_model->partner_uzi_total($partner["id"], $service_module_id, $this->start_date, $this->end_date);
+					}
+					if($service_module_id == 4) { //Muolaja xizmati
+						$partner_modules[$partner["id"]][$service_module_name]= $this->ci->reports_model->partner_services_total($partner["id"], $service_module_id, $this->start_date, $this->end_date);
+					}
+					if($service_module_id == 5) { //EKG
+						$partner_modules[$partner["id"]][$service_module_name]= $this->ci->reports_model->partner_ekg_total($partner["id"], $service_module_id, $this->start_date, $this->end_date);
+					}
+					if($service_module_id == 6) { //Xolter
+						$partner_modules[$partner["id"]][$service_module_name]= $this->ci->reports_model->partner_holter_total($partner["id"], $service_module_id, $this->start_date, $this->end_date);
+					}
+
 				}
 			}
 		}

@@ -33,6 +33,8 @@ class Registry extends Admin_Controller {
                 "room_beds_model",
                 "patient_room_model",
                 "payments_debt_discount_model",
+                "partners_bill_model",
+                "doctors_bill_model",
             ));
 
 //        $this->load->library(array("WebClientPrint"));
@@ -74,10 +76,13 @@ class Registry extends Admin_Controller {
 
         $this->data["payment_type_options"] = $this->payment_types_model->get_payment_types();
         $expense_type_options = ["Boshqa chiqimlar"];
-		foreach ($this->expense_type_model->get_expense_types() as $etype) {
+		foreach ($this->expense_type_model->get_expense_types(1) as $etype) {
 			$expense_type_options[$etype["id"]] = $etype["name"];
         }
         $this->data["expense_type_options"] = $expense_type_options;
+
+		$this->data["partners"] = $this->partners_model->get_partners(null, 1);
+		$this->data["doctors"] = $this->doctors_model->get_doctors_all(1);;
 
         $this->data['payment_type'] = [
             'name' => 'payment_type',
@@ -143,11 +148,13 @@ class Registry extends Admin_Controller {
 
 		$partners[] = "-- Танлаш --";
 		foreach ($this->partners_model->get_partners() as $partner) {
-			if($partner["type"] == 1) {
+			if($partner["type"] == 1 && $partner["active"] == 1) {
 				$partners[$partner["id"]] = $partner["last_name"] ." ". $partner["first_name"];
-			} else {
-				$partners[$partner["id"]] = $partner["company"];
 			}
+
+//			else {
+//				$partners[$partner["id"]] = $partner["company"];
+//			}
 		}
 		$this->data["partners_options"] = $partners;
 
@@ -243,6 +250,7 @@ class Registry extends Admin_Controller {
 					"discount"	    	=> $discount,
 					"total"             => $total,
 					"status"            => 0,
+					'doctor_id'        => $this->input->post('sender_doctor_id'),
 					'partner_id'        => $this->input->post('partner_id'),
 				);
 				$payment_id = $this->patients_payments_model->add($payment_arr);
@@ -1207,11 +1215,13 @@ class Registry extends Admin_Controller {
 
         $partners[] = "-- Танлаш --";
         foreach ($this->partners_model->get_partners() as $partner) {
-            if($partner["type"] == 1) {
+			if($partner["type"] == 1 && $partner["active"] == 1) {
                 $partners[$partner["id"]] = $partner["last_name"] ." ". $partner["first_name"];
-            } else {
-                $partners[$partner["id"]] = $partner["company"];
             }
+
+//            else {
+//                $partners[$partner["id"]] = $partner["company"];
+//            }
         }
         $this->data["partners_options"] = $partners;
 
@@ -2341,6 +2351,14 @@ class Registry extends Admin_Controller {
                                     <div class="js_expense_cell_input d-none"><input type="text" class="form-control" value="'.$expens["amount"].'" name="amount[]" id="amount_'.$expens["id"].'" /></div>
                                 </div>';
             $data[$key][2] = $payment_types[$expens["payment_type_id"]];
+			$data[$key][2] = '<div class="js_expense_cell">
+                                    <div class="js_expense_cell_text">'.$payment_types[$expens["payment_type_id"]].'</div>
+                                    <div class="js_expense_cell_input d-none">
+                                    	<select id="payment_type_id_'.$expens["id"].'" name="payment_type_id[]" class="select">';
+			foreach ($payment_types as $id => $name) {
+				$data[$key][2] .='<option value="'.$id.'" '.($expens["payment_type_id"] == $id ? "selected":"").'>'.$name.'</option>';
+			}
+			$data[$key][2] .='</select></div></div>';
             $data[$key][3] = $expense_types[$expens["expense_type_id"]];
             $data[$key][4] = '<div class="js_expense_cell">
                                     <div class="js_expense_cell_text">'.$expens["reason"].'</div>
@@ -2359,6 +2377,88 @@ class Registry extends Admin_Controller {
         echo json_encode($response);
     }
 
+	public function ajax_show_partners_bills() {
+
+		$now = new DateTime("now");
+		$start_date = $end_date = $now->format("Y-m-d");
+
+		$partners_bills = $this->partners_bill_model->get_partners_bills($start_date, $end_date, 1);
+		$payment_types = $this->payment_types_model->get_payment_types();
+		$data = array();
+		foreach ($partners_bills as $key => $partner_bill) {
+			$data[$key]["DT_RowId"] = "expense_row_".$partner_bill["id"];
+			$data[$key][0] = '<div>
+                                <div class="expense_date">'.date("d.m.Y H:i", strtotime($partner_bill["created_date"])).'</div>
+                                <div class="expenser">'.$partner_bill["user_last_name"].' '.$partner_bill["user_first_name"].'</div>
+                            </div>
+                    ';
+			$data[$key][1] = '<div class="js_expense_cell">
+                                    <div class="js_expense_cell_text">'.number_format($partner_bill["amount"], 0, ',', ' ').'</div>
+                                    <div class="js_expense_cell_input d-none"><input type="text" class="form-control" value="'.$partner_bill["amount"].'" name="amount[]" id="amount_'.$partner_bill["id"].'" /></div>
+                                </div>';
+			$data[$key][2] = '<div class="js_expense_cell">
+                                    <div class="js_expense_cell_text">'.$partner_bill["payment_type"].'</div>
+                                    <div class="js_expense_cell_input d-none">
+                                    	<select id="payment_type_id_'.$partner_bill["id"].'" name="payment_type_id[]" class="select">';
+										foreach ($payment_types as $id => $name) {
+											$data[$key][2] .='<option value="'.$id.'" '.($partner_bill["payment_type_id"] == $id ? "selected":"").'>'.$name.'</option>';
+										}
+			$data[$key][2] .='</select></div></div>';
+			$data[$key][3] = $partner_bill["last_name"].' '.$partner_bill["first_name"];
+			$data[$key][4] = '<a class="js_expense_edit_field js_expense_edit" href="javascript:void(0);" data-id="'.$partner_bill["id"].'"><span class="fa fa-edit"></span></a>
+                                <a class="pl-3 js_expense_remove" href="javascript:void(0);" data-id="'.$partner_bill["id"].'" data-url="'.site_url("admin/registry/ajax_partner_bill_delete").'"><span class="fa fa-window-close-o text-danger"></span></a>
+                                <div class="js_expense_update_box d-none">
+                                    <a class="js_expense_edit_field js_expense_apply" href="javascript:void(0);" data-id="'.$partner_bill["id"].'" data-url="'.site_url("admin/registry/ajax_partner_bill_update").'"><span class="fa fa-check-square-o text-success"></span></a>
+                                    <a class="js_expense_edit_field js_expense_cancel ml-3" href="javascript:void(0);" data-id="'.$partner_bill["id"].'"><span class="fa fa-minus-square-o text-danger"></span></a>
+                                </div>
+                                ';
+		}
+
+		$response = array("data" => $data);
+		echo json_encode($response);
+	}
+
+	public function ajax_show_doctors_bills() {
+
+		$now = new DateTime("now");
+		$start_date = $end_date = $now->format("Y-m-d");
+
+		$doctors_bills = $this->doctors_bill_model->get_doctors_bills_by_date($start_date, $end_date, 1);
+		$payment_types = $this->payment_types_model->get_payment_types();
+		$data = array();
+		foreach ($doctors_bills as $key => $doctor_bill) {
+			$data[$key]["DT_RowId"] = "expense_row_".$doctor_bill["id"];
+			$data[$key][0] = '<div>
+                                <div class="expense_date">'.date("d.m.Y H:i", strtotime($doctor_bill["created_date"])).'</div>
+                                <div class="expenser">'.$doctor_bill["user_last_name"].' '.$doctor_bill["user_first_name"].'</div>
+                            </div>
+                    ';
+			$data[$key][1] = '<div class="js_expense_cell">
+                                    <div class="js_expense_cell_text">'.number_format($doctor_bill["amount"], 0, ',', ' ').'</div>
+                                    <div class="js_expense_cell_input d-none"><input type="text" class="form-control" value="'.$doctor_bill["amount"].'" name="amount[]" id="amount_'.$doctor_bill["id"].'" /></div>
+                                </div>';
+			$data[$key][2] = '<div class="js_expense_cell">
+                                    <div class="js_expense_cell_text">'.$doctor_bill["payment_type"].'</div>
+                                    <div class="js_expense_cell_input d-none">
+                                    	<select id="payment_type_id_'.$doctor_bill["id"].'" name="payment_type_id[]" class="select">';
+										foreach ($payment_types as $id => $name) {
+											$data[$key][2] .='<option value="'.$id.'" '.($doctor_bill["payment_type_id"] == $id ? "selected":"").'>'.$name.'</option>';
+										}
+			$data[$key][2] .='</select></div></div>';
+			$data[$key][3] = $doctor_bill["doctor_last_name"].' '.$doctor_bill["doctor_first_name"];
+			$data[$key][4] = '<a class="js_expense_edit_field js_expense_edit" href="javascript:void(0);" data-id="'.$doctor_bill["id"].'"><span class="fa fa-edit"></span></a>
+                                <a class="pl-3 js_expense_remove" href="javascript:void(0);" data-id="'.$doctor_bill["id"].'" data-url="'.site_url("admin/registry/ajax_doctor_bill_delete").'"><span class="fa fa-window-close-o text-danger"></span></a>
+                                <div class="js_expense_update_box d-none">
+                                    <a class="js_expense_edit_field js_expense_apply" href="javascript:void(0);" data-id="'.$doctor_bill["id"].'" data-url="'.site_url("admin/registry/ajax_doctor_bill_update").'"><span class="fa fa-check-square-o text-success"></span></a>
+                                    <a class="js_expense_edit_field js_expense_cancel ml-3" href="javascript:void(0);" data-id="'.$doctor_bill["id"].'"><span class="fa fa-minus-square-o text-danger"></span></a>
+                                </div>
+                                ';
+		}
+
+		$response = array("data" => $data);
+		echo json_encode($response);
+	}
+
     /****
      * Chiqimlarni bazaga kiritamiz
      * */
@@ -2368,12 +2468,21 @@ class Registry extends Admin_Controller {
 
             //Bugungi kun uchun barcha kirimlarni xisoblaymiz
             $real_payment = $this->patients_payments_model->real_payment();
-            $result["real_payment"] = (count($real_payment) > 0) ? $real_payment["paid"]:0;
+            $result["real_payment"] = is_null($real_payment) ? 0:$real_payment["paid"];
 
             //Bugungi kun uchun barcha chiqimlarni xisoblaymiz
             $total_expenses = $this->expenses_model->get_expenses();
-            $total_expenses = is_null($total_expenses) ? 0:$total_expenses;
-            $result["total_expenses"] = $total_expenses;
+			$result["total_expenses"] = is_null($total_expenses) ? 0 : $total_expenses;
+
+			//Bugungi kun uchun barcha xavkorlarga tulovni xisoblaymiz
+            $total_partners_bills = $this->partners_bill_model->get_partners_bills_total(null, null, 1);
+			$result["total_partners_bills"] = is_null($total_partners_bills) ? 0 : $total_partners_bills;
+
+			//Bugungi kun uchun barcha xavkorlarga tulovni xisoblaymiz
+            $total_doctors_bills = $this->doctors_bill_model->get_doctors_bills_total(null, null, 1);
+			$result["total_doctors_bills"] = is_null($total_doctors_bills) ? 0 : $total_doctors_bills;
+
+
 
             echo json_encode($result);
         }
@@ -2416,12 +2525,18 @@ class Registry extends Admin_Controller {
 
             if ($this->form_validation->run() === TRUE) {
                 $result["errors"] = false;
-                $expense_id = $this->input->post("expense_id");
+                $expense_id = $this->input->post("bill_id");
+                $payment_type_id = $this->input->post("payment_type_id");
                 $amount = $this->input->post("amount");
                 $reason = $this->input->post("reason");
 
-                $id = $this->expenses_model->update($expense_id, array("amount"=>$amount, "reason" => $reason));
-                $result["success"] = $id;
+                $expense = $this->expenses_model->update($expense_id, array(
+                	"amount"	=>$amount,
+					"reason" 	=> $reason,
+					"payment_type_id" => $payment_type_id
+					)
+				);
+                $result["success"] = $expense;
 
             } else {
                 $result["errors"] = $this->form_validation->error_array();
@@ -2438,12 +2553,73 @@ class Registry extends Admin_Controller {
     public function ajax_remove_expense()
     {
         if ($this->input->is_ajax_request()) {
-            $expense_id = $this->input->post("expense_id");
+            $expense_id = $this->input->post("bill_id");
             $result = $this->expenses_model->delete($expense_id);
 
             echo json_encode($result);
         }
     }
+
+	public function ajax_partner_bill_update() {
+
+		$result = array();
+		$this->form_validation->set_rules('amount', "Суммани киритинг", 'trim|required|integer');
+		$this->form_validation->set_rules('payment_type_id', "Тўлов тури", 'required');
+
+		if ($this->form_validation->run() === TRUE) {
+			$result["errors"] = false;
+			$id 			 = $this->input->post("bill_id");
+			$amount 		 = $this->input->post("amount");
+			$payment_type_id = $this->input->post("payment_type_id");
+
+			$partner_bill 	 = $this->partners_bill_model->update($id, ['amount' => $amount, 'payment_type_id' => $payment_type_id]);
+			$result["success"] = $partner_bill;
+
+		} else {
+			$result["errors"] = $this->form_validation->error_array();
+		}
+
+		echo json_encode($result);
+	}
+
+	public function ajax_partner_bill_delete() {
+		$id 	= $this->input->post("bill_id");
+		$result = $this->partners_bill_model->delete($id);
+
+		echo json_encode($result);
+
+	}
+
+	public function ajax_doctor_bill_update() {
+
+		$result = array();
+		$this->form_validation->set_rules('amount', "Суммани киритинг", 'trim|required|integer');
+		$this->form_validation->set_rules('payment_type_id', "Тўлов тури", 'required');
+
+		if ($this->form_validation->run() === TRUE) {
+			$result["errors"] = false;
+			$id 			 = $this->input->post("bill_id");
+			$amount 		 = $this->input->post("amount");
+			$payment_type_id = $this->input->post("payment_type_id");
+
+			$doctor_bill 	 = $this->doctors_bill_model->update($id, ['amount' => $amount, 'payment_type_id' => $payment_type_id]);
+			$result["success"] = $doctor_bill;
+
+		} else {
+			$result["errors"] = $this->form_validation->error_array();
+		}
+
+		echo json_encode($result);
+	}
+
+
+	public function ajax_doctor_bill_delete() {
+		$id 	= $this->input->post("bill_id");
+		$result = $this->doctors_bill_model->delete($id);
+
+		echo json_encode($result);
+
+	}
 
     /**
      * @return array
@@ -2481,11 +2657,13 @@ class Registry extends Admin_Controller {
 
         $partners[] = "-- Танлаш --";
         foreach ($this->partners_model->get_partners() as $partner) {
-            if($partner["type"] == 1) {
+			if($partner["type"] == 1 && $partner["active"] == 1) {
                 $partners[$partner["id"]] = $partner["last_name"] ." ". $partner["first_name"];
-            } else {
-                $partners[$partner["id"]] = $partner["company"];
             }
+
+//            else {
+//                $partners[$partner["id"]] = $partner["company"];
+//            }
         }
         $this->data["partners_options"] = $partners;
 
@@ -2663,11 +2841,13 @@ class Registry extends Admin_Controller {
 
 		$partners[] = "-- Танлаш --";
 		foreach ($this->partners_model->get_partners() as $partner) {
-			if($partner["type"] == 1) {
+			if($partner["type"] == 1 && $partner["active"] == 1) {
 				$partners[$partner["id"]] = $partner["last_name"] ." ". $partner["first_name"];
-			} else {
-				$partners[$partner["id"]] = $partner["company"];
 			}
+
+//			else {
+//				$partners[$partner["id"]] = $partner["company"];
+//			}
 		}
 		$this->data["partners_options"]     = $partners;
 		$this->data["payment_type_options"] = $this->payment_types_model->get_payment_types();

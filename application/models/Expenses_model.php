@@ -45,19 +45,19 @@ class Expenses_model extends CI_Model
         return $result;
     }
 
-    public function get_partner($id)
+    public function get_expense($id)
     {
-        $result = $this->db->get_where("expenses", array("id" => $id))->row_array();
-
-        return $result;
+    	$this->db->select("e.*, pt.name as payment_type");
+    	$this->db->join("payment_types pt", "pt.id = e.payment_type_id", "left");
+		return $this->db->get_where("expenses e", array("e.id" => $id))->row_array();
     }
 
     public function update($id, $arr)
     {
         $this->db->where("id", $id);
-        $result = $this->db->update("expenses", $arr);
+        $this->db->update("expenses", $arr);
 
-        return $result;
+        return $this->get_expense($id);
     }
 
     public function add($arr)

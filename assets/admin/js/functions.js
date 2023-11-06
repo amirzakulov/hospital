@@ -259,7 +259,6 @@ $(document).ready(function () {
         $(".js_patient_searchbox").autocomplete({
             serviceUrl: patient_list_url,
             onSearchStart: function (query) {
-				console.log(query)
                 var $this = $(this);
                 $this.closest(".js_patient_search_content").find(".js_patient_search_result_box").html('');
                 $(".js_patient_search_result_box").hide();
@@ -330,26 +329,10 @@ $(document).ready(function () {
         var $this = $(this);
         var f1 = $this.closest("form");
         var url = $this.data("url");
-        console.log(url);
-
-        // var patient_id_dom  = f1.find("[name='patient_id']");
-        // var patient_id      = patient_id_dom.val();
-        // var start_date_dom  = f1.find("[name='start_date']");
-        // var start_date      = start_date_dom.val();
-        // var end_date_dom    = f1.find("[name='end_date']");
-        // var end_date        = end_date_dom.val();
-        // var bed_id_dom      = f1.find("[name='bed_id']");
-        // var bed_id          = bed_id_dom.val();
-        // var payment_type_dom = f1.find("[name='payment_type']");
-        // var payment_type    = payment_type_dom.val();
-        // var price_dom       = f1.find("[name='price']");
-        // var price           = price_dom.val();
-        // var data            = {patient_id:patient_id, bed_id:bed_id, payment_type:payment_type, price:price, start_date:start_date, end_date:end_date};
 
         var f1_data = f1.serializeArray();
 
         $.post(url, f1_data, function (res) {
-            console.log(res);
             f1.find(".form-control").removeAttr("style");
             f1.find(".form-group").find(".invalid-feedback").html("").css("display","none");
             if(res["errors"] != false) {
@@ -439,7 +422,6 @@ $(document).ready(function () {
             total_dom.val(res["total"]);
             paid_dom.val(res["paid"]);
 
-            // console.log(res);
 
             if(res["paid"] < res["total"]) {
 
@@ -525,7 +507,6 @@ $(document).ready(function () {
         var price           = f.find("[name='price']").val();
 
         if(start_date.length > 0 && end_date.length > 0) {
-            // console.log(start_date +" "+ end_date);
             var days = get_between_days(start_date, end_date);
             var total_dom = f.find("[name='total']");
             var paid_dom = f.find("[name='paid']");
@@ -589,7 +570,6 @@ $(document).ready(function () {
 			headers: '.origin',
         });
 
-
         $(".search-items").keyup(function () {
             var $this = $(this);
             var remove_btn = $this.closest("div").find(".js_clear_text");
@@ -608,7 +588,6 @@ $(document).ready(function () {
      *********************************************
     * */
     $(".js_show_cash_expenses").click(function () {
-        var $this = $(this);
 
         get_cash_today();
         create_datatable_cash();
@@ -617,24 +596,49 @@ $(document).ready(function () {
         $modal.modal("show");
     });
 
-    $('#expenses').on('hidden.bs.modal', function (e) {
+    $(".js_show_partners").click(function () {
+        get_cash_today();
+        create_datatable_partners();
+
+        var $modal = $("#partners_checkout");
+        $modal.modal("show");
+    });
+
+    $(".js_show_doctors").click(function () {
+        get_cash_today();
+		create_datatable_doctors();
+
+        var $modal = $("#doctors_checkout");
+        $modal.modal("show");
+    });
+
+    $('#expenses, #partners_chechout, #doctors_checkout').on('hidden.bs.modal', function (e) {
         var $this = $(this);
         $this.find("form .form-control").removeAttr("style");
     })
 
 
     $(document).on("click", ".js_add_expense", function () {
-        var $this = $(this);
-        var form = $this.closest("form");
-        var url = form.attr("action");//admin/registry/ajax_add_expenses
-        var amount_dom = form.find("input[name='amount']");
-        var amount = amount_dom.val();
-        var reason_dom = form.find("textarea[name='reason']");
-        var reason = reason_dom.val();
+        var $this 			= $(this);
+        var form 			= $this.closest("form");
+        var url 			= form.attr("action");//admin/registry/ajax_add_expenses
+        var amount_dom 		= form.find("input[name='amount']");
+        var amount 			= amount_dom.val();
+		var from_cash_dom 	= form.find("input[name='from_cash']");
+		var from_cash		= from_cash_dom.val();
+        var reason_dom 		= form.find("textarea[name='reason']");
+        var reason 			= reason_dom.val();
         var payment_type_id = form.find("select[name='payment_type_id']").val();
         var expense_type_id = form.find("select[name='expense_type_id']").val();
 
-        $.post(url, {amount:amount, reason:reason, payment_type_id:payment_type_id, expense_type_id:expense_type_id}, function (res) {
+        let data = {
+        	amount:amount,
+			reason:reason,
+			payment_type_id:payment_type_id,
+			expense_type_id:expense_type_id
+        }
+
+        $.post(url, data, function (res) {
 
             form.find(".form-control").removeAttr("style");
             if(res["errors"] != false) {
@@ -647,10 +651,91 @@ $(document).ready(function () {
                 amount_dom.val("");
                 reason_dom.val("");
 
-                // var cash_url = $(document).find(".js_show_cash_expenses").data("urlCash");
-                // var datatable_url = $this.data("url");
                 get_cash_today();
                 create_datatable_cash();
+            }
+        }, "json");
+    });
+
+
+    $(document).on("click", ".js_add_partner_payment", function () {
+
+        var $this 			= $(this);
+        var form 			= $this.closest("form");
+        var url 			= form.attr("action");//admin/partner/ajax_partner_checkout
+        var amount_dom 		= form.find("input[name='amount']");
+        var amount 			= amount_dom.val();
+		var from_cash_dom 	= form.find("input[name='from_cash']");
+		var from_cash		= from_cash_dom.val();
+        var partner_id_dom 	= form.find("select[name='partner_id']");
+        var partner_id 		= partner_id_dom.val();
+        var payment_type_id = form.find("select[name='payment_type_id']").val();
+
+		let data = {
+			from_cash:from_cash,
+			amount:amount,
+			payment_type_id:payment_type_id,
+			partner_id:partner_id
+		}
+
+		$.post(url, data, function (res) {
+
+            form.find(".form-control").removeAttr("style");
+			form.find("small").html("")
+            if(res["errors"] != false) {
+                $.each(res["errors"], function (index, value) {
+                    form.find("[name="+index+"]").css({"border":"1px solid red"});
+					form.find("[name="+index+"]").siblings("small").html(value)
+                });
+            }
+            else
+            {
+                amount_dom.val("");
+				partner_id_dom.val("");
+
+                get_cash_today();
+                create_datatable_partners()
+            }
+        }, "json");
+    });
+
+    $(document).on("click", ".js_add_doctor_payment", function () {
+
+        var $this 			= $(this);
+        var form 			= $this.closest("form");
+        var url 			= form.attr("action");//admin/doctors/ajax_doctor_checkout
+        var amount_dom 		= form.find("input[name='amount']");
+        var amount 			= amount_dom.val();
+        var from_cash_dom 	= form.find("input[name='from_cash']");
+        var from_cash		= from_cash_dom.val();
+        var doctor_id_dom 	= form.find("select[name='doctor_id']");
+        var doctor_id 		= doctor_id_dom.val();
+        var payment_type_id = form.find("select[name='payment_type_id']").val();
+
+        let data = {
+			from_cash:from_cash,
+			amount:amount,
+			payment_type_id:payment_type_id,
+			doctor_id:doctor_id
+        }
+
+        $.post(url, data, function (res) {
+            form.find(".form-control").removeAttr("style");
+			form.find("small").html("")
+            if(res["errors"] != false) {
+
+                $.each(res["errors"], function (index, value) {
+                    form.find("[name="+index+"]").css({"border":"1px solid red"});
+					form.find("[name="+index+"]").siblings("small").html(value)
+                });
+            }
+            else
+            {
+                amount_dom.val("");
+				doctor_id_dom.val("");
+
+                get_cash_today();
+                create_datatable_doctors()
             }
         }, "json");
     });
@@ -677,22 +762,27 @@ $(document).ready(function () {
         } else if($this.hasClass("js_expense_apply")) {//saqlash tugmasini bosganda
             remove_btn.show();
             var url = $this.data("url");
+
             var expense_id = $this.data("id");
             var amount_dom = tr.find("[name='amount[]']");
             var amount = amount_dom.val();
             var amount_text_dom = amount_dom.closest(".js_expense_cell").find(".js_expense_cell_text");
-
+			var payment_type_dom = tr.find("select[name='payment_type_id[]']");
+			var payment_type_id = payment_type_dom.val();
+			var payment_text_dom = payment_type_dom.closest(".js_expense_cell").find(".js_expense_cell_text");
             var description_dom = tr.find("[name='reason[]']");
             var description = description_dom.val();
             var description_text_dom = description_dom.closest(".js_expense_cell").find(".js_expense_cell_text");
 
             var data = {
-                expense_id:expense_id,
+                bill_id:expense_id,
                 amount:amount,
+				payment_type_id:payment_type_id,
                 reason:description
             };
 
             $.post(url, data, function (res) {
+
                 tr.find(".form-control").removeAttr("style");
                 if(res["errors"] != false) {
 
@@ -703,6 +793,7 @@ $(document).ready(function () {
                 else
                 {
                     amount_text_dom.text(amount);
+					payment_text_dom.text(res.success.payment_type)
                     description_text_dom.text(description);
                     expense_update_box.addClass("d-none");
                     expense_edit.removeClass("d-none");
@@ -723,7 +814,7 @@ $(document).ready(function () {
         var url = $this.data("url");
         var row = $this.closest("tr");
 
-        $.post(url, {expense_id:expense_id}, function (res) {
+        $.post(url, {bill_id:expense_id}, function (res) {
             if(res == true) {
                 row.remove();
                 get_cash_today();
@@ -888,8 +979,13 @@ $(document).ready(function () {
 
 	});
 
-	$(".js_report_tab").click(function(){
-		const $this 		= $(this);
+	$(".js_report_tab, .js_report_tab_debt_link").click(function(){
+
+		let $this = $(this);
+		if($this.hasClass('js_report_tab_debt_link')){
+			$this = $(".js_report_tab.debt")
+		}
+
 		const url 			= $this.data('href');
 		const ul  			= $this.closest('ul');
 		const start_date 	= ul.data('startDate');
@@ -897,6 +993,9 @@ $(document).ready(function () {
 		const js_container 	= $("#js_inout_block");
 
 		ul.find("a.nav-link").removeClass('active');
+		if($this.hasClass('debt')) {
+			$(".nav-link.debt")
+		}
 		$this.addClass('active')
 
 		let data = {
@@ -929,31 +1028,41 @@ $(document).ready(function () {
 
 	})
 
-	$(".js_pay_partner_bill").click(function(){
+	$(document).on("click",".js_pay_partner_bill", function(){
 		const $this = $(this)
-		const url = $this.data("url")
-		const partner_id = $this.data("partnerId")
-		const paid = $this.data("paid")
-		const debt = $this.data("debt")
-		const payment_input = $this.closest("td").find("input[name='payment']");
-		const amount = parseInt(payment_input.val())
-		const error_dom = $this.closest("td").find(".js_pay_partner_bill_error");
-		const tr = $this.closest("tr")
+		const url 				= $this.data("url")
+		const partner_id 		= $this.data("partnerId")
+		const paid_dom 			= $this.closest("td").find("input[name='paid']");
+		const paid 				= parseInt(paid_dom.val());
+		const debt_dom 			= $this.closest("td").find("input[name='debt']");
+		const debt 				= parseInt(debt_dom.val());
+		const payment_type_dom 	= $this.closest("td").find("select[name='payment_type_id']");
+		const payment_type_id 	= parseInt(payment_type_dom.val());
+		const from_cash_dom 	= $this.closest("td").find("select[name='from_cash']");
+		const from_cash 		= parseInt(from_cash_dom.val());
+		const payment_input 	= $this.closest("td").find("input[name='payment']");
+		const amount 			= parseInt(payment_input.val())
+		const error_dom 		= $this.closest("td").find(".js_pay_partner_bill_error");
+		const tr 				= $this.closest("tr")
 		const partner_bill_paid = tr.find(".js_partner_bill_paid strong")
 		const partner_bill_left = tr.find(".js_partner_bill_left strong")
 		error_dom.html('')
 
 		const data = {
 			partner_id: partner_id,
+			payment_type_id: payment_type_id,
 			amount: amount,
+			from_cash: from_cash,
 		}
 
 		if(debt >= amount && amount > 0) {
 
 			$.post(url, data, function (res) {
-				console.log(res)
+
 				partner_bill_paid.html(paid + amount)
 				partner_bill_left.html(debt - amount)
+				paid_dom.val(paid + amount)
+				debt_dom.val(debt - amount)
 				payment_input.val('')
 			}, "json")
 		} else {
@@ -961,13 +1070,20 @@ $(document).ready(function () {
 		}
 	});
 
-	$(".js_pay_doctor_bill").click(function(){
+	$(document).on("click",".js_pay_doctor_bill", function(){
 		const $this = $(this)
 		const url = $this.data("url")
 		const doctor_id = $this.data("doctorId")
-		const paid = $this.data("paid")
-		const debt = $this.data("debt")
-		const payment_input = $this.closest("td").find("input[name='doctor_payment']");
+
+		const paid_dom = $this.closest("td").find("input[name='paid']");
+		const paid = parseInt(paid_dom.val());
+		const debt_dom = $this.closest("td").find("input[name='debt']");
+		const debt = parseInt(debt_dom.val());
+		const payment_type_dom 	= $this.closest("td").find("select[name='payment_type_id']");
+		const payment_type_id 	= parseInt(payment_type_dom.val());
+		const from_cash_dom 	= $this.closest("td").find("select[name='from_cash']");
+		const from_cash 		= parseInt(from_cash_dom.val());
+		const payment_input = $this.closest("td").find("input[name='payment']");
 		const amount = parseInt(payment_input.val())
 		const error_dom = $this.closest("td").find(".js_pay_doctor_bill_error");
 		const tr = $this.closest("tr")
@@ -977,23 +1093,185 @@ $(document).ready(function () {
 
 		const data = {
 			doctor_id: doctor_id,
+			payment_type_id: payment_type_id,
 			amount: amount,
+			from_cash: from_cash,
 		}
 
 		if(debt >= amount && amount > 0) {
 
 			$.post(url, data, function (res) {
-				console.log(res)
+
 				doctor_bill_paid.html(paid + amount)
 				doctor_bill_left.html(debt - amount)
+				paid_dom.val(paid + amount)
+				debt_dom.val(debt - amount)
 				payment_input.val('')
+
 			}, "json")
 		} else {
 			error_dom.html('Қийматни текшириб қайта киритинг!')
 		}
-
-
 	});
+
+	$(document).on('click','.js_show_partner_bills', function(){
+		const $this = $(this)
+		const url = $this.data('url')
+		const partner_id = $this.data('partnerId')
+		const start_date = $this.data('startDate')
+		const end_date 	 = $this.data('endDate')
+
+		const data = {
+			partner_id: partner_id,
+			start_date: start_date,
+			end_date: end_date,
+
+		}
+
+		$.post(url, data, function(res){
+			const modal = $("#partners_doctors_checkout");
+			const title = modal.find(".js_partners_checkout__title")
+			const modalBody = modal.find(".modal-body table tbody");
+			const total = modal.find(".modal-footer .js_partners_checkout__total strong");
+
+			title.html(res.name)
+			modalBody.html(res.html);
+			total.html(res.total);
+
+			modal.modal("show")
+		}, "json");
+	})
+
+	$(document).on("click", ".js_partners_checkout_btn", function () {
+		const $this = $(this)
+		const td = $this.closest("td")
+		const tr = $this.closest("tr")
+		const bill_id = tr.data("id")
+		const partner_id = tr.data("partnerId")
+		const partners_checkout_amount_td = tr.find(".js_partners_checkout__amount")
+		const partners_checkout_amount_span = partners_checkout_amount_td.find("span")
+		const partners_checkout_amount_input = partners_checkout_amount_td.find("input")
+
+		const partners_checkout_payment_type_td = tr.find(".js_partners_checkout__payment_type")
+		const partners_checkout_payment_type_span = partners_checkout_payment_type_td.find("span")
+		const partners_checkout_payment_type_select = partners_checkout_payment_type_td.find("select")
+
+		const partners_checkout_edit_btn   = td.find(".js_partners_checkout__edit")
+		const partners_checkout_save_btn   = td.find(".js_partners_checkout__save")
+		const partners_checkout_remove_btn = td.find(".js_partners_checkout__remove")
+		const partners_checkout_cancel_btn = td.find(".js_partners_checkout__cancel")
+
+		if($this.hasClass("js_partners_checkout__edit")) {
+			partners_checkout_amount_span.addClass("d-none")
+			partners_checkout_amount_input.removeClass("d-none")
+
+			partners_checkout_payment_type_span.addClass("d-none")
+			partners_checkout_payment_type_select.removeClass("d-none")
+
+			partners_checkout_edit_btn.addClass("d-none")
+			partners_checkout_remove_btn.addClass("d-none")
+			partners_checkout_save_btn.removeClass("d-none")
+			partners_checkout_cancel_btn.removeClass("d-none")
+		}
+
+		if($this.hasClass("js_partners_checkout__cancel")) {
+			partners_checkout_amount_span.removeClass("d-none")
+			partners_checkout_amount_input.addClass("d-none")
+
+			partners_checkout_payment_type_span.removeClass("d-none")
+			partners_checkout_payment_type_select.addClass("d-none")
+
+			partners_checkout_edit_btn.removeClass("d-none")
+			partners_checkout_remove_btn.removeClass("d-none")
+			partners_checkout_save_btn.addClass("d-none")
+			partners_checkout_cancel_btn.addClass("d-none")
+		}
+
+		if($this.hasClass("js_partners_checkout__save")) {
+			const update_url = partners_checkout_save_btn.data("url");
+			const amount = partners_checkout_amount_input.val();
+			const payment_type_id = partners_checkout_payment_type_select.find(":selected").val();
+			const modal = $("#partners_doctors_checkout")
+
+			$.post(update_url, {bill_id:bill_id, amount:amount, payment_type_id: payment_type_id}, function (res) {
+
+				partners_checkout_amount_span.html(amount)
+				partners_checkout_amount_span.removeClass("d-none")
+				partners_checkout_amount_input.val(amount)
+				partners_checkout_amount_input.addClass("d-none")
+
+
+				partners_checkout_payment_type_span.html(res.partner_bill.payment_type)
+				partners_checkout_payment_type_span.removeClass("d-none")
+				partners_checkout_payment_type_select.val(res.partner_bill.payment_type_id)
+				partners_checkout_payment_type_select.addClass("d-none")
+
+
+
+				partners_checkout_edit_btn.removeClass("d-none")
+				partners_checkout_remove_btn.removeClass("d-none")
+				partners_checkout_save_btn.addClass("d-none")
+				partners_checkout_cancel_btn.addClass("d-none")
+
+				let page = '';
+				if(res.report == "partners") {
+					page = $("#js_monthly_reports_partners")
+				}
+				if(res.report == "partner_company") {
+					page = $("#js_monthly_reports_partner_company")
+				}
+				if(res.report == "doctors") {
+					page = $("#js_monthly_reports_doctors")
+				}
+				page.html(res.view)
+
+				const amounts = modal.find(".js_partners_checkout__amount input")
+
+				let total = 0
+				amounts.each((index, value) => {
+					total +=parseInt($(value).val())
+				})
+
+				modal.find(".modal-footer .js_partners_checkout__total strong").html(total);
+
+				// modal.modal("hide")
+				// modal.find("tbody").html('')
+			}, "json")
+
+
+		}
+
+		if($this.hasClass("js_partners_checkout__remove")) {
+			const remove_url = partners_checkout_remove_btn.data("url");
+			const modal = $("#partners_doctors_checkout")
+			$.post(remove_url, {bill_id:bill_id}, function (res) {
+				tr.remove();
+
+				let page = '';
+				if(res.report == "partners") {
+					page = $("#js_monthly_reports_partners")
+				}
+				if(res.report == "doctors") {
+					page = $("#js_monthly_reports_doctors")
+				}
+				page.html(res.view)
+
+				const amounts = modal.find(".js_partners_checkout__amount input")
+				let total = 0
+				amounts.each((index, value) => {
+					total +=parseInt($(value).val())
+				})
+
+				modal.find(".modal-footer .js_partners_checkout__total strong").html(total);
+				// modal.modal("hide")
+				// modal.find("tbody").html('')
+			},"json")
+		}
+
+
+	})
+
+
 });
 
 
@@ -1022,49 +1300,134 @@ function get_between_days(start_date_str, end_date_str) {
  * Chiqimlar uchun datatable yaratish
  * */
 function create_datatable_cash() {
-    var url = $(document).find(".js_show_cash_expenses").data("url");//admin/registry/ajax_show_expenses
-    table = $('#js_datatable_cash').DataTable();
-    table.destroy();
+	var url = $(document).find(".js_show_cash_expenses").data("url");//admin/registry/ajax_show_expenses
+	table = $('#js_datatable_cash').DataTable();
+	table.destroy();
 
-    return table = $('#js_datatable_cash').DataTable({
-        "scrollY": "300px",
-        "scrollCollapse": true,
-        "paging": false,
-        "bFilter": false,
-        "searching": true,
-        "ordering": true,
-        "order":[[ 0, "desc" ]],
-        "info":     false,
-        "autoWidth": true,
-        // "lengthMenu": [[10], [10]]
-        "language": {
-            "emptyTable": "Маълумотлар топилмади",
-            "sInfoEmpty":"Umumiy 0 yozuvlardan 0 dan 0 gachasi ko'rsatilmoqda",
-            "oPaginate": {
-                "sFirst":       "Биринчи",
-                "sPrevious":    "Аввалги",
-                "sNext":        "Кейинги",
-                "sLast":        "Сўнгги"
-            },
-            "sSearch":          "Қидириш:",
-        },
-        columnDefs: [
-            { "orderable": false, targets: -1 },
-            { "width": "20%", "targets": 0 },
-            { "width": "15%", "targets": 1 },
-            { "width": "15%", "targets": 2 },
-            { "width": "15%", "targets": 3 },
-            { "width": "27%", "targets": 4 },
-            { "width": "8%", "targets": 5 },
-        ],
-        "ajax": {
-            "url": url,
-            "type": "POST",
-			// "success": function (res) {
-			// 	console.log(res);
-			// }
-        },
-    });
+	return table = $('#js_datatable_cash').DataTable({
+		"scrollY": "500px",
+		"scrollCollapse": true,
+		"paging": false,
+		"bFilter": false,
+		"searching": true,
+		"ordering": true,
+		"order":[[ 0, "desc" ]],
+		"info":     false,
+		"autoWidth": true,
+		// "lengthMenu": [[10], [10]]
+		"language": {
+			"emptyTable": "Маълумотлар топилмади",
+			"sInfoEmpty":"Umumiy 0 yozuvlardan 0 dan 0 gachasi ko'rsatilmoqda",
+			"oPaginate": {
+				"sFirst":       "Биринчи",
+				"sPrevious":    "Аввалги",
+				"sNext":        "Кейинги",
+				"sLast":        "Сўнгги"
+			},
+			"sSearch":          "Қидириш:",
+		},
+		columnDefs: [
+			{ "orderable": false, targets: -1 },
+			{ "width": "20%", "targets": 0 },
+			{ "width": "15%", "targets": 1 },
+			{ "width": "15%", "targets": 2 },
+			{ "width": "15%", "targets": 3 },
+			{ "width": "27%", "targets": 4 },
+			{ "width": "8%", "targets": 5 },
+		],
+		"ajax": {
+			"url": url,
+			"type": "POST",
+		},
+	});
+}
+
+/** Xamkorlarning tulovlarinig qilish uchun */
+function create_datatable_partners() {
+	var url = $(document).find(".js_show_partners").data("url");//admin/registry/ajax_show_partners_payments
+
+	table = $('#js_datatable_partners').DataTable();
+	table.destroy();
+
+	return table = $('#js_datatable_partners').DataTable({
+		"scrollY": "300px",
+		"scrollCollapse": true,
+		"paging": false,
+		"bFilter": false,
+		"searching": true,
+		"ordering": true,
+		"order":[[ 0, "desc" ]],
+		"info":     false,
+		"autoWidth": true,
+		// "lengthMenu": [[10], [10]]
+		"language": {
+			"emptyTable": "Маълумотлар топилмади",
+			"sInfoEmpty":"Umumiy 0 yozuvlardan 0 dan 0 gachasi ko'rsatilmoqda",
+			"oPaginate": {
+				"sFirst":       "Биринчи",
+				"sPrevious":    "Аввалги",
+				"sNext":        "Кейинги",
+				"sLast":        "Сўнгги"
+			},
+			"sSearch":          "Қидириш:",
+		},
+		columnDefs: [
+			{ "orderable": false, targets: -1 },
+			{ "width": "20%", "targets": 0 },
+			{ "width": "15%", "targets": 1 },
+			{ "width": "15%", "targets": 2 },
+			{ "width": "15%", "targets": 3 },
+			// { "width": "27%", "targets": 4 },
+			{ "width": "8%", "targets": 4 },
+		],
+		"ajax": {
+			"url": url,
+			"type": "POST",
+		},
+	});
+}
+
+/** Shifokorlarning tulovlarinig qilish uchun */
+function create_datatable_doctors() {
+	var url = $(document).find(".js_show_doctors").data("url");//admin/registry/ajax_show_doctors_bills
+
+	table = $('#js_datatable_doctors').DataTable();
+	table.destroy();
+
+	return table = $('#js_datatable_doctors').DataTable({
+		"scrollY": "300px",
+		"scrollCollapse": true,
+		"paging": false,
+		"bFilter": false,
+		"searching": true,
+		"ordering": true,
+		"order":[[ 0, "desc" ]],
+		"info":     false,
+		"autoWidth": true,
+		"language": {
+			"emptyTable": "Маълумотлар топилмади",
+			"sInfoEmpty":"Umumiy 0 yozuvlardan 0 dan 0 gachasi ko'rsatilmoqda",
+			"oPaginate": {
+				"sFirst":       "Биринчи",
+				"sPrevious":    "Аввалги",
+				"sNext":        "Кейинги",
+				"sLast":        "Сўнгги"
+			},
+			"sSearch":          "Қидириш:",
+		},
+		columnDefs: [
+			{ "orderable": false, targets: -1 },
+			{ "width": "20%", "targets": 0 },
+			{ "width": "15%", "targets": 1 },
+			{ "width": "15%", "targets": 2 },
+			{ "width": "15%", "targets": 3 },
+			{ "width": "8%", "targets": 4 },
+		],
+		"ajax": {
+			"url": url,
+			"type": "POST",
+		},
+	});
 }
 
 /***********
@@ -1073,16 +1436,26 @@ function create_datatable_cash() {
 function get_cash_today() {
     var url = $(document).find(".js_show_cash_expenses").data("urlCash");//admin/registry/ajax_get_cash_today
     $.post(url, {}, function (res) {
-        var wrapper = $("#expenses");
+
+        var wrapper = $(".checkout_modal_wrapper");
         var total_income_dom    = wrapper.find(".js_total_income");
         var total_expense_dom   = wrapper.find(".js_total_expense");
         var total_cash_dom      = wrapper.find(".js_total_cash");
 
-        // console.log(res);
+        let real_payment = 0
+        let total_expenses = 0
+        let total_partners_bills = 0
+        let total_doctors_bills = 0
+		if(res["real_payment"] != null) real_payment = parseInt(res["real_payment"])
+		if(res["total_expenses"] != null) total_expenses = parseInt(res["total_expenses"])
+		if(res["total_partners_bills"] != null) total_partners_bills = parseInt(res["total_partners_bills"])
+		if(res["total_doctors_bills"] != null) total_doctors_bills = parseInt(res["total_doctors_bills"])
 
-        total_income_dom.text(number_format(res["real_payment"], 2, ',', ' '));
-        total_expense_dom.text(number_format(res["total_expenses"], 2, ',', ' '));
-        total_cash_dom.text(number_format((res["real_payment"] - res["total_expenses"]), 2, ',', ' '));
+		let total_expense = total_expenses + total_partners_bills + total_doctors_bills
+
+        total_income_dom.text(number_format(real_payment, 2, ',', ' '));
+        total_expense_dom.text(number_format(total_expense, 2, ',', ' '));
+        total_cash_dom.text(number_format((real_payment - total_expense), 2, ',', ' '));
     }, "json");
 }
 

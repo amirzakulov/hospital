@@ -14,6 +14,8 @@ class Partners extends Admin_Controller {
             "cities_model",
             "service_modules_model",
             "service_modules_shares_model",
+            "patients_payments_model",
+            "payment_types_model",
         ));
 
         $this->load->language("patients");
@@ -584,7 +586,7 @@ class Partners extends Admin_Controller {
 
         $this->data["partner"] = $this->partners_model->get_partner($partner_id);
         $this->data["patients"] = $this->partners_model->get_partner_share_details($partner_id, $start_date, $end_date);
-        $this->data["bills"] = $this->partners_bill_model->get_partners_bill($partner_id);
+        $this->data["bills"] = $this->partners_bill_model->get_partner_bills($partner_id);
 
 
         $this->mybreadcrumb->add('Хамкорлар', site_url("admin/partners/reports/" . $start_date_param . "/" . $end_date_param));
@@ -598,17 +600,162 @@ class Partners extends Admin_Controller {
 	{
 		if($this->input->is_ajax_request() ) {
 
-			$partner_id = $this->input->post("partner_id");
-			$amount = $this->input->post("amount");
+			$result = array();
+			$this->form_validation->set_rules('amount', "Суммани киритиш", 'trim|required|integer');
+			$this->form_validation->set_rules('payment_type_id', "Тўлов турини танлаш", 'trim|required');
+			$this->form_validation->set_rules('partner_id', "Хамкорни танлаш", 'trim|required');
 
-			$partner_bill_id = $this->partners_bill_model->add(array("partner_id" => $partner_id, "amount" => $amount));
+			if ($this->form_validation->run() === TRUE) {
 
-			$partner = $this->partners_model->get_partner_share($partner_id);
+				$result["errors"] = false;
 
+				$this->user_id = $this->session->userdata("user_id");
+				$partner_id    = $this->input->post("partner_id");
 
-			echo json_encode($partner);
+				$arr = [
+					"partner_id" 		=> $partner_id,
+					"amount" 			=> $this->input->post("amount"),
+					"payment_type_id" 	=> $this->input->post("payment_type_id"),
+					"user_id" 			=> $this->user_id,
+					"from_cash" 		=> $this->input->post("from_cash"),
+				];
+
+				$this->partners_bill_model->add($arr);
+
+				$partner = $this->partners_model->get_partner_share($partner_id);
+				$result["success"] = $partner;
+			} else {
+				$result["errors"] = $this->form_validation->error_array();
+			}
+
+			echo json_encode($result);
+
 		}
-
     }
 
+	public function ajax_show_partner_bills()
+	{
+		$partner_id = $this->input->post("partner_id");
+		$startDate 	= $this->input->post("start_date");
+		$endDate 	= $this->input->post("end_date");
+
+		$result = $this->partners_bill_model->get_partner_bills_by_date($partner_id, $startDate, $endDate);
+		$payment_types = $this->payment_types_model->get_payment_types();
+
+		$name = "";
+		$html = "";
+		$total = 0;
+		foreach ($result as $payment) {
+			$payment_types_selectbox = [
+				'name' => '',
+				'value' => $this->form_validation->set_select('payment_type_id[]', $payment["payment_type_id"]),
+				'class' => 'form-control-sm d-none',
+			];
+
+			$total +=$payment["amount"];
+			$name = $payment["last_name"]." ".$payment["first_name"];
+			$html .= "
+			<tr data-id='".$payment["id"]."' data-partner-id='".$partner_id."'>
+						<td>".date("d.m.Y H:s", strtotime($payment["created_date"]))."</td> 
+						<td class='js_partners_checkout__amount' style='width: 300px'>
+							<span>".$payment["amount"]."</span>
+							<input type='text' class='d-none' value='".$payment["amount"]."'>
+						</td>
+						<td class='js_partners_checkout__payment_type'>
+							<span>".$payment["payment_type"]."</span>";
+					$html .= form_dropdown($payment_types_selectbox, $payment_types, $payment["payment_type_id"]);
+					$html .= "
+						</td>
+						<td>".$payment["user_last_name"]." ".$payment["user_first_name"]."</td>
+						<td class='text-right'>
+							<div class='btn-group'>
+								<button type='button' class='btn btn-primary btn-sm d-none js_partners_checkout_btn js_partners_checkout__save'
+								data-url='".site_url("admin/partners/ajax_partner_bill_update")."'
+								data-partner-id='".$partner_id."'
+								>
+									<span class='fa fa-check'></span>
+								</button>
+								<button type='button' class='btn btn-danger btn-sm d-none js_partners_checkout_btn js_partners_checkout__cancel'>
+									<span class='fa fa-minus'></span>
+								</button>
+								<button type='button' class='btn btn-primary btn-sm js_partners_checkout_btn js_partners_checkout__edit'>
+									<span class='fa fa-pencil'></span>
+								</button>
+								<button type='button' class='btn btn-danger btn-sm js_partners_checkout_btn js_partners_checkout__remove'
+								data-url='".site_url("admin/partners/ajax_partner_bill_delete")."'
+								data-partner-id='".$partner_id."'
+								>
+									<span class='fa fa-remove'></span>
+								</button>
+							</div>
+						</td>
+					</tr>
+			";
+		}
+
+		echo json_encode(["name" => $name, "html" => $html, "total" => $total]);
+    }
+
+	public function ajax_partner_bill_update() {
+		$partner_id 	 = $this->input->post("partner_id");
+    	$id 			 = $this->input->post("bill_id");
+    	$amount 		 = $this->input->post("amount");
+    	$payment_type_id = $this->input->post("payment_type_id");
+
+    	$partner_bill 	 = $this->partners_bill_model->update($id, ['amount' => $amount, 'payment_type_id' => $payment_type_id]);
+
+    	$view 			 = $this->partners_monthly_report();
+    	$report_type = $partner_id == 8 ? "partner_company":"partners";
+		echo json_encode(["view" => $view, "report" => $report_type, "partner_bill" => $partner_bill]);
+	}
+
+	public function ajax_partner_bill_delete() {
+		$id = $this->input->post("bill_id");
+		$this->partners_bill_model->delete($id);
+		$view = $this->partners_monthly_report();
+
+		echo json_encode(["view" => $view, "report" => "partners"]);
+
+	}
+
+	public function partners_monthly_report()
+	{
+		$now = new DateTime("now");
+		$m_start_date = $now->format("Y-m-1");
+		$m_end_date = $now->format("Y-m-t");
+		$this->data['m_start_date'] = $m_start_date;
+		$this->data['m_end_date'] 	= $m_end_date;
+
+		$service_modules = $this->service_modules_model->get_service_modules_array();
+
+		$partners_monthly_array = [];
+		$partners_monthly = $this->patients_payments_model->get_partners($m_start_date, $m_end_date);
+		foreach ($partners_monthly as $partner) {
+			$partners_monthly_array[$partner["id"]] = $partner["last_name"]." ".$partner["first_name"];
+		}
+		$this->data["partners_monthly_array"] = $partners_monthly_array;
+
+		//Xamkorlar report
+		$this->load->library('reports/PartnersDailyReport');
+		$partnersDailyReport = new PartnersDailyReport();
+
+		$partnersMonthlyReportParams = [
+			"start_date" 	  => $m_start_date,
+			"end_date"   	  => $m_end_date,
+			"service_modules" => $service_modules,
+			"partners" 		  => $partners_monthly,
+		];
+		$partners_monthly_modules = array();
+		if(count($partners_monthly)) {
+			$partners_monthly_modules = $partnersDailyReport->show($partnersMonthlyReportParams);
+		}
+
+		$this->data["partners_monthly_report"] = $partners_monthly_modules;
+
+		$this->data["payment_types"] = $this->payment_types_model->get_payment_types();
+
+		$view = $this->load->view("admin/reports/monthly_reports/partners", $this->data, true);
+
+		return $view;
+	}
 }

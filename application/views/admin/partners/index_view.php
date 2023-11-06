@@ -18,10 +18,10 @@
                 <th class="align-text-top" width="15%"><?= lang("index_job_title_th"); ?></th>
                 <th class="align-text-top" width="15%"><?= lang("index_phone_th"); ?></th>
                 <th class="align-text-top" width="15%"><?= lang("index_company_th"); ?></th>
-                <th class="align-text-top" width="15%"><?= lang("index_description_th"); ?></th>
-                <th class="align-text-top" width="5%"><?= lang("index_agreement_th"); ?></th>
+                <th class="align-text-top" width="10%">Статус</th>
+                <th class="align-text-top" width="10%"><?= lang("index_agreement_th"); ?></th>
                 <th class="align-text-top" width="15%"><?= lang("index_partner_department_th"); ?></th>
-                <th class="text-right align-text-top" width="5%"><?= lang("general_actions"); ?></th>
+                <th class="text-right align-text-top" width="5%"></th>
             </tr>
             </thead>
             <tbody>
@@ -31,7 +31,7 @@
                 <td><?= $partner["job_title"]; ?></td>
                 <td><?= phone_number_format($partner["phone"]); ?></td>
                 <td><?= $partner["company"]; ?></td>
-                <td><?= $partner["description"]; ?></td>
+				<td><?= $partner["active"] ? "Фаол":"Нофаол"; ?></td>
                 <td><?= $partner["agreement"]; ?></td>
                 <td><?= $type_options[$partner["type"]]; ?></td>
                 <td class="text-right">

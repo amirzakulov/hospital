@@ -610,4 +610,41 @@ class Reports_model extends CI_Model
 
 	}
 
+	public function vitamed_total($start_date, $end_date)
+	{
+		$query = $this->db->query("
+            SELECT pl.payment_id, l.name, l.price, l.price_partner, pp.partner_id, pp.created_date
+			FROM patients_payments AS pp
+			LEFT JOIN patient_laboratories pl ON pl.payment_id = pp.id
+			LEFT JOIN laboratories l ON l.id = pl.lab_id
+			WHERE DATE(pp.created_date) >= '".$start_date."' AND DATE(pp.created_date) <= '".$end_date."' 
+			AND pp.laboratory_status > 0 AND pl.is_parent = 1 AND l.price_partner > 0
+        ");
+
+		$total = array('total' => 0, 'partner_share' => 0, 'partner_total' => 0);
+		foreach ($query->result_array() as $laboratory) {
+
+			$total["total"] += $laboratory["price"];
+			$total["partner_total"] += $laboratory["price_partner"] ;
+		}
+
+		return $total;
+
+	}
+
+	public function vitamed_total_details($start_date, $end_date)
+	{
+		$query = $this->db->query("
+            SELECT pl.payment_id, l.name, l.price, l.price_partner, pp.partner_id, pp.created_date
+			FROM patients_payments AS pp
+			LEFT JOIN patient_laboratories pl ON pl.payment_id = pp.id
+			LEFT JOIN laboratories l ON l.id = pl.lab_id
+			WHERE DATE(pp.created_date) >= '".$start_date."' AND DATE(pp.created_date) <= '".$end_date."' 
+			AND pp.laboratory_status > 0 AND pl.is_parent = 1 AND l.price_partner > 0
+        ");
+
+		return $query->result_array();
+
+	}
+
 }

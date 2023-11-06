@@ -54,8 +54,56 @@ $data = ["paid_debts" => $paid_debts];
 <?php $this->load->view('admin/reports/daily_reports/partners') ?>
 <?php $this->load->view('admin/reports/daily_reports/doctors') ?>
 
-<div style="height: 5px;" class="bg-secondary mt-5"></div>
+<div id="js_monthly_reports_partners">
 <?php $this->load->view('admin/reports/monthly_reports/partners') ?>
+</div>
+<div id="js_monthly_reports_doctors">
 <?php $this->load->view('admin/reports/monthly_reports/doctors') ?>
+</div>
+<?php $this->load->view('admin/reports/daily_reports/partner_companies') ?>
+<div id="js_monthly_reports_partner_company">
+<?php $this->load->view('admin/reports/monthly_reports/partner_companies') ?>
+</div>
+<?php $this->load->view('admin/reports/daily_reports/expenditure') ?>
+<?php $this->load->view('admin/reports/monthly_reports/expenditure') ?>
+
+
+<div class="modal" id="partners_doctors_checkout" tabindex="-1" data-backdrop="static">
+	<div class="modal-dialog modal-lg modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-body">
+				<h4 class="js_partners_checkout__title"></h4>
+				<table class="table table-border table-striped custom-table mb-0 compact expenses_table">
+					<thead>
+					<tr>
+						<th>Сана</th>
+						<th>Сумма</th>
+						<th>Тўлов тури</th>
+						<th>Ким киритди</th>
+						<th class="text-right"></th>
+					</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+			<div class="modal-footer">
+				<div class="row col-md-9">
+					<div class="js_partners_checkout__total float-left">
+						<span>Жами:</span>
+						<strong></strong>
+					</div>
+				</div>
+				<div class="row col-md-3">
+					<div class="text-right">
+						<button type="button" class="btn btn-secondary btn-md" data-dismiss="modal">Ойнани ёпиш</button>
+					</div>
+				</div>
+
+
+			</div>
+		</div>
+	</div>
+</div>
 
 <?php $this->load->view('admin/reports/footer_template_view'); ?>
+

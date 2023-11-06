@@ -17,6 +17,23 @@
                     </div>
                 </div>
             </div>
+			<div class="row">
+				<div class="col-sm-4">
+					<div class="form-group mt-3">
+						<label class="d-block pb-2">Статус:</label>
+						<div class="form-check-inline">
+							<label class="form-check-label">
+								<input type="radio" name="active" checked value="1" class="form-check-input">Фаол
+							</label>
+						</div>
+						<div class="form-check-inline">
+							<label class="form-check-label">
+								<input type="radio" name="active" value="0" class="form-check-input">Нофаол
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
         </div>
 
         <div class="m-t-20 text-center">

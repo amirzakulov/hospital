@@ -10,11 +10,12 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-6">
         <table class="table table-border table-striped custom-table datatable mb-0 compact">
             <thead class="thead-dark">
             <tr>
-                <th class="align-text-top" width="30%">Номи</th>
+                <th class="align-text-top" width="60%">Номи</th>
+                <th class="align-text-top" width="10%">Статус</th>
                 <th class="text-right align-text-top" width="5%"><?= lang("general_actions"); ?></th>
             </tr>
             </thead>
@@ -22,6 +23,7 @@
             <?php foreach ($expense_type as $etype) {?>
             <tr id="js_row_<?= $etype["id"] ?>">
                 <td><?= $etype["name"]; ?></td>
+                <td><?= $etype["active"] ? "Фаол":"Нофаол"; ?></td>
                 <td class="text-right">
 					<?php if($etype["id"] > 0) {?>
                     <div class="dropdown dropdown-action">

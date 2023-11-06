@@ -2,7 +2,7 @@
 	<div class="col-md-12">
 		<h3 class="text-center">Шифокорлар ойлик хисобот</h3>
 
-		<table class="table table-borderless custom-table mb-0 compact1 font-13">
+		<table class="table table-borderless custom-table mb-0 font-13">
 			<thead>
 			<tr class="bg-primary text-white">
 				<th class="align-text-top">Номи<br></th>
@@ -31,7 +31,7 @@
 
 						<?php
 						$CI =& get_instance();
-						$bill = $CI->doctors_bill_model->get_doctor_bill_by_date($doctor_id, '2023-10-01', '2023-10-30');
+						$bill = $CI->doctors_bill_model->get_doctor_bill_by_date($doctor_id, $m_start_date, $m_end_date);
 						$amount = is_null($bill) ? 0 : $bill['amount'];
 						?>
 						<tr class="text-right">
@@ -54,16 +54,37 @@
 						<td><strong><?= $partner_total; ?></strong></td>
 						<td class="js_doctor_bill_paid"><strong><?= $amount; ?></strong></td>
 						<td class="js_doctor_bill_left"><strong><?= $partner_total - $amount; ?></strong></td>
-						<td width="200" class="text-right">
-							<div class="input-group float-right" style="width: 150px;">
-								<input class="form-control form-control-sm" name="doctor_payment" type="text">
+						<td width="300" class="text-right">
+							<input type="hidden" name="paid" value="<?= $amount ?>">
+							<input type="hidden" name="debt" value="<?= $partner_total - $amount ?>">
+							<div class="input-group float-right">
+								<div class="input-group-prepend ml-auto d-none">
+									<select name="from_cash" class="form-control form-control-sm">
+										<option value="0" selected>Депозитдан</option>
+										<option value="1">Кассадан</option>
+									</select>
+								</div>
+								<div class="input-group-prepend ml-auto">
+									<select name="payment_type_id" class="form-control form-control-sm">
+										<?php foreach ($payment_types as $id => $type) {?>
+											<option value="<?= $id; ?>"><?= $type; ?></option>
+										<?php } ?>
+									</select>
+								</div>
+								<input class="form-control form-control-sm" name="payment" type="text">
 								<div class="input-group-append">
 									<button class="btn btn-primary btn-sm js_pay_doctor_bill" type="button"
 											data-url="<?= site_url('admin/doctors/ajax_doctor_checkout') ?>"
 											data-doctor-id="<?= $doctor_id ?>"
-											data-paid="<?= $amount ?>"
-											data-debt="<?= $partner_total - $amount ?>"
 									><span class="fa fa-check"></span></button>
+								</div>
+								<div class="input-group-append">
+									<button class="btn btn-success btn-sm js_show_partner_bills border-dark" type="button"
+											data-url="<?= site_url('admin/doctors/ajax_show_doctor_bills') ?>"
+											data-partner-id="<?= $doctor_id ?>"
+											data-start-date="<?= $m_start_date ?>"
+											data-end-date="<?= $m_end_date ?>"
+									><span class="fa fa-eye"></span></button>
 								</div>
 							</div>
 							<small class="text-danger js_pay_doctor_bill_error"></small>
@@ -76,102 +97,5 @@
 			</tbody>
 		</table>
 
-
-
-
-
-<!--		<table class="table table-borderless custom-table mb-0 compact1 font-13">-->
-<!--			<thead>-->
-<!--			<tr class="bg-primary text-white">-->
-<!--				<th class="align-text-top">Номи<br></th>-->
-<!--				<th class="align-text-top text-right">Жами<br></th>-->
-<!--				<th class="align-text-top text-right">Улуш %</th>-->
-<!--				<th class="align-text-top text-right">Улуш сўм</th>-->
-<!--				<th class="align-text-top text-right">Клиника</th>-->
-<!--			</tr>-->
-<!--			</thead>-->
-<!--			<tbody>-->
-<!--			<tr><td colspan="5"><strong>Зарифжон Муродов (уролог)</strong></td></tr>-->
-<!--			<tr class="text-right">-->
-<!--				<td class="text-left">Лаборатория</td>-->
-<!--				<td>5 000 000</td>-->
-<!--				<td>20</td>-->
-<!--				<td>1 000 000</td>-->
-<!--				<td>4 000 000</td>-->
-<!--			</tr>-->
-<!--			<tr class="text-right">-->
-<!--				<td class="text-left">УЗИ</td>-->
-<!--				<td>5 000 000</td>-->
-<!--				<td>20</td>-->
-<!--				<td>1 000 000</td>-->
-<!--				<td>4 000 000</td>-->
-<!--			</tr>-->
-<!--			<tr class="text-right">-->
-<!--				<td class="text-left">Ётоқ</td>-->
-<!--				<td>5 000 000</td>-->
-<!--				<td>20</td>-->
-<!--				<td>1 000 000</td>-->
-<!--				<td>4 000 000</td>-->
-<!--			</tr>-->
-<!--			<tr class="text-right">-->
-<!--				<td class="text-left">Муолажа хизмати</td>-->
-<!--				<td>5 000 000</td>-->
-<!--				<td>20</td>-->
-<!--				<td>1 000 000</td>-->
-<!--				<td>4 000 000</td>-->
-<!--			</tr>-->
-<!--			<tr class="text-right">-->
-<!--				<td></td>-->
-<!--				<td><strong>20 000 000</strong></td>-->
-<!--				<td></td>-->
-<!--				<td><strong>4 000 000</strong></td>-->
-<!--				<td><strong>16 000 000</strong></td>-->
-<!--			</tr>-->
-<!---->
-<!--			<tr><td colspan="5"><strong>Абдулазиз Хамролиев (Кардиолог)</strong></td></tr>-->
-<!--			<tr class="text-right">-->
-<!--				<td class="text-left">Лаборатория</td>-->
-<!--				<td>5 000 000</td>-->
-<!--				<td>20</td>-->
-<!--				<td>1 000 000</td>-->
-<!--				<td>4 000 000</td>-->
-<!--			</tr>-->
-<!--			<tr class="text-right">-->
-<!--				<td class="text-left">УЗИ</td>-->
-<!--				<td>5 000 000</td>-->
-<!--				<td>20</td>-->
-<!--				<td>1 000 000</td>-->
-<!--				<td>4 000 000</td>-->
-<!--			</tr>-->
-<!--			<tr class="text-right">-->
-<!--				<td class="text-left">ЭКГ</td>-->
-<!--				<td>5 000 000</td>-->
-<!--				<td>20</td>-->
-<!--				<td>1 000 000</td>-->
-<!--				<td>4 000 000</td>-->
-<!--			</tr>-->
-<!--			<tr class="text-right">-->
-<!--				<td class="text-left">Холтер</td>-->
-<!--				<td>5 000 000</td>-->
-<!--				<td>20</td>-->
-<!--				<td>1 000 000</td>-->
-<!--				<td>4 000 000</td>-->
-<!--			</tr>-->
-<!--			<tr class="text-right">-->
-<!--				<td class="text-left">Ётоқ</td>-->
-<!--				<td>5 000 000</td>-->
-<!--				<td>20</td>-->
-<!--				<td>1 000 000</td>-->
-<!--				<td>4 000 000</td>-->
-<!--			</tr>-->
-<!--			<tr class="text-right">-->
-<!--				<td></td>-->
-<!--				<td><strong>20 000 000</strong></td>-->
-<!--				<td></td>-->
-<!--				<td><strong>4 000 000</strong></td>-->
-<!--				<td><strong>16 000 000</strong></td>-->
-<!--			</tr>-->
-<!--			</tbody>-->
-<!--		</table>-->
 	</div>
 </div>

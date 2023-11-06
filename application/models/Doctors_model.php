@@ -146,8 +146,8 @@ class Doctors_model extends CI_Model
         return $query->result_array();
     }
 
-    public function get_doctors_all() {
-        $this->db->select("d.id, u.id as user_id, u.last_name, u.first_name, u.surname, u.dob, u.address, u.phone, u.email, u.username, u.active,
+    public function get_doctors_all($active = null) {
+        $this->db->select("d.id, u.id as user_id, u.last_name, u.first_name, u.surname, u.dob, u.address, u.phone, u.email, u.username, d.active,
         u.region_id, r.name as region_name, u.city_id, c.name as city_name, u.gender, u.description, u.photo, dtl.price, dtl.agreement, 
         dt.id as department_id, dt.name as department_name,
         j.name as job_title, j.description as job_title_description, ug.group_id");
@@ -159,6 +159,9 @@ class Doctors_model extends CI_Model
         $this->db->join("job_titles j", "j.id = d.job_title_id", "left");
         $this->db->join("regions r", "r.id = u.region_id");
         $this->db->join("cities c", "c.id = u.city_id");
+        if(!is_null($active)) {
+        	$this->db->where("d.active", $active);
+		}
         $this->db->where_in("ug.group_id", $this->config->item("doctor_groups_id"));
         $result = $this->db->get("employees d")->result_array();
 

@@ -7,8 +7,11 @@ class Expense_type_model extends CI_Model
         parent::__construct();
     }
 
-	public function get_expense_types() {
+	public function get_expense_types($active = null) {
 		$this->db->order_by("name", "asc");
+		if(!is_null($active)) {
+			$this->db->where("active", $active);
+		}
 		$query = $this->db->get("expense_type");
 
 		return $query->result_array();
